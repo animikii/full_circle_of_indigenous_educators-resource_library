@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "snowpack": "^3.5.9"
+  },
+  "scripts": {
+    "start": "snowpack dev",
+    "build": "snowpack build"
+  }
+}

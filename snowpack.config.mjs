@@ -1,9 +1,6 @@
 export default {
-  packageOptions: {
-    source: 'remote',
-  },
   mount: {
-    src: '/'
+   src: '/',
   },
   plugins: [
     '@snowpack/plugin-vue',

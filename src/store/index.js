@@ -1,5 +1,7 @@
+import { reactive } from 'vue';
+
 const store = {
-  state: Vue.reactive({
+  state: reactive({
     resources: []
   }),
 

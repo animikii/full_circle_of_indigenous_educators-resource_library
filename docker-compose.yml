@@ -17,7 +17,7 @@ services:
       - db
     image: wordpress:latest
     volumes:
-      - ./dist:/var/www/html/wp-content/themes/twentytwentyone/js
+      - ./build:/var/www/html/wp-content/themes/twentytwenty/js
       - wordpress_data:/var/www/html
     ports:
       - "8000:80"

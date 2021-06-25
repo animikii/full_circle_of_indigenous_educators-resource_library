@@ -5,4 +5,7 @@ export default {
   plugins: [
     '@snowpack/plugin-vue',
   ],
+  buildOptions: {
+    sourcemaps: true
+  }
 };

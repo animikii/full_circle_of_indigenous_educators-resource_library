@@ -1,4 +1,4 @@
-import { get } from '.';
+import { get, searchText } from './';
 
 const ResourceApi = { 
   mapRecords(records) {
@@ -12,6 +12,10 @@ const ResourceApi = {
   },
   get() {
     return get('Resource').then(data => this.mapRecords(data.records));
+  },
+  search(fields, text) {
+    return searchText('Resource', fields, text).then(data => this.mapRecords(data.records));
+
   }
 };
 

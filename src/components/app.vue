@@ -2,7 +2,7 @@
   import store from '../store';
   import ResourceApi from '../api/resources';
   import ResourceList from './resource-list';
-  import Test from './test';
+  import SideBar from './side-bar';
 
   export default {
     mounted() {
@@ -10,19 +10,22 @@
     },
     components: {
       ResourceList,
-      Test
+      SideBar,
     }
   };
 </script>
 
 <template>
-  <ResourceList></ResourceList>
-  <Test></Test>
+  <div id="root">
+    <SideBar></SideBar>
+    <ResourceList></ResourceList>
+  </div>
 </template>
 
-<style scoped>
-  div {
-    background: orange;
+<style>
+  #root {
+    display: flex;
+    flex-direction: row;
   }
 </style>
 

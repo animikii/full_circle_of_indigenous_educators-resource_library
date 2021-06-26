@@ -4,7 +4,9 @@
   import { createComponent } from './';
   import ResourceApi from '../api/resources';
   import store from '../store';
+
   import LoadingSpinner from './loading-spinner';
+  import ResourceItem from './resource-item';
 
   export default createComponent({
     data() {
@@ -32,41 +34,23 @@
       }
     },
     components: {
-      LoadingSpinner
+      LoadingSpinner,
+      ResourceItem
     }
   });
 </script>
 
 <template>
   <div class="resource-list">
+    <h1 class="header">Resource Library</h1>
     <div class="search-bar">
-      <input type="text" v-on:input='search'>
+      <input type="text" v-on:input='search' placeholder="Search">
       <LoadingSpinner v-bind:enabled='searching' ></LoadingSpinner>
     </div>
+
     <ul>
       <li v-for="resource in resources">
-        <div class="resource-tile">
-          <img aria-hidden=true v-bind:src="resource.Image[0].url"/>
-          <div>
-            {{ resource.Title }}
-          </div>
-          <div>
-            {{ resource['Creators Lookup'] }}
-          </div>
-          <div>
-            {{ resource['Type Lookup'] }}
-          </div>
-          <div>
-            {{ resource['Themes Lookup'] }}
-          </div>
-          <div>
-            {{ resource['Types Lookup'] }}
-          </div>
-          <div>
-            {{ resource['Age Range'] }}
-          </div>
-         
-        </div>
+        <ResourceItem v-bind:resource="resource"></ResourceItem>
       </li>
     </ul>
   </div>
@@ -74,7 +58,7 @@
 
 <style>
   .resource-list {
-    background: orange;
+    background: transparent;
     margin: 0;
     padding: 1em;
     flex: 1;
@@ -82,15 +66,26 @@
     max-width: 100%;
   }
 
-  .resource-list ul {
-    display: grid;
-    grid-template-columns: 1fr 1fr; 
-    grid-template-rows: minmax(0px, 300px);
-    max-width: 100%;
+  .resource-list .header {
+    font-family: 'Alegreya', serif;
+    font-size: 1.68em;
+    color: var(--color-primary);
+    font-weight: 300;
   }
 
-  .resource-list li {
+  .resource-list > ul {
+    display: grid;
+    grid-template-columns: 50% 50%; 
+    grid-auto-rows: auto;
+    row-gap: 1em;
+
+    max-width: 100%;
+    padding: 0;
+  }
+
+  .resource-list > ul > li {
     height: 100%;
+    display: block;
   }
 
 
@@ -99,13 +94,9 @@
     align-items: center;
   }
 
-  .resource-tile {
-    height: 100%;
-  }
-
-  .resource-tile img {
-    max-height: 100%;    
-    max-width: 100%;
-    object-fit: contain;
+  .search-bar input {
+    font-size: 1.5em;
+    width: 50%;
+    padding: 8px;
   }
 </style>

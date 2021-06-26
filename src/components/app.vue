@@ -1,4 +1,5 @@
 <script>
+
   import store from '../store';
   import ResourceApi from '../api/resources';
   import ResourceList from './resource-list';
@@ -17,7 +18,6 @@
 
 <template>
   <div id="root">
-    <SideBar></SideBar>
     <ResourceList></ResourceList>
   </div>
 </template>
@@ -26,6 +26,16 @@
   #root {
     display: flex;
     flex-direction: row;
+ 
+    --color-primary: #1a67b5;
+    --color-text: rgb(91, 61, 61);
+
+    --transition-time: 300ms;
+
+    font-family: Lato, sans-serif;
+    color: var(--color-text);
+
+
   }
 </style>
 

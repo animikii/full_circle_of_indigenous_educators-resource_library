@@ -4,7 +4,7 @@ import store from '../store';
 
 const BASE_URL = 'https://api.airtable.com/v0/appuVy798hQyevSty';
 const API_KEY = 'keyHcUQA9jlV08F7o';
-const SORT ='&sort%5B0%5D%5Bfield%5D=Title&sort%5B0%5D%5Bdirection%5D=desc';
+const SORT ='&sort%5B0%5D%5Bfield%5D=Title&sort%5B0%5D%5Bdirection%5D=asc';
 
 
 const throttledFetch = _.throttle((url, resolve, reject) => {

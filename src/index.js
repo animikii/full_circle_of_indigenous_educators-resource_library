@@ -1,8 +1,17 @@
 // import App from './components/app';
 import { createApp } from 'vue';
-import App from './components/app';
+import VueRouter from 'vue-router';
 
-//var mount = App.mount("#app");
-//
-createApp(App).mount('#app');
+import App from './components/app';
+import ResourceList from './components/resource-list';
+
+const routes = [
+];
+
+const router = new VueRouter({ routes });
+
+const app = createApp(App);
+
+app.mount('#app');
+
 

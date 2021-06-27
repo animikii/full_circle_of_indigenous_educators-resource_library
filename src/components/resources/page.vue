@@ -58,7 +58,7 @@
           if(to.next) {
             let nextToken = to.next;
             store.actions.associateTokens(this.currentToken, nextToken);
-            this.currentToken = pageToken;
+            this.currentToken = nextToken;
           } else if (to.search) {
             this.searchResources(); 
             return;

@@ -1,7 +1,7 @@
 <script>
   import _ from 'lodash';
 
-  import ResourceTags from './tags';
+  import ResourceTags from '../tags';
 
   export default {
     props: ['resource'],
@@ -25,9 +25,13 @@
       <img aria-hidden=true v-bind:src="resource.Image[0].url"/>
     </div>
     <div class="details">
-      <router-link :to="{ name: 'resource', params: { id: resource._id }}" class="title">
+      <router-link v-if='$route.name == "resources"' :to="{ name: 'resource', params: { id: resource._id }}" class="title">
         {{ resource.Title }}
       </router-link>
+      <span v-if='$route.name != "resources"' :to="{ name: 'resource', params: { id: resource._id }}" class="title inactive">
+        {{ resource.Title }}
+      </span>
+
 
       <div class="details-grid" v-for="nameRole in nameRoles">
         <span class="role">{{ nameRole[0] }}&nbsp</span>
@@ -54,6 +58,8 @@
         <ResourceTags
           category="Age Range"
           v-bind:tags="resource['Age Range']"></ResourceTags>
+
+        <slot></slot>
       </div>
     </div>
   </div>
@@ -94,10 +100,19 @@
     font-size: 1.4em;
     color: var(--color-primary);
     text-decoration: none;
+    margin-bottom: 8px;
+  }
+
+  .resource-tile .title.inactive {
+    color: var(--color-text);
   }
 
   .resource-tile .title:hover, .resource-tile .title:focus {
     text-decoration: underline;
+  }
+
+  .resource-tile .title.inactive:hover, .resource-tile .title.inactive:focus {
+    text-decoration: none; 
   }
 
 

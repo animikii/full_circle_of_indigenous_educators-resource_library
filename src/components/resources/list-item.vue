@@ -1,7 +1,7 @@
 <script>
   import _ from 'lodash';
 
-  import ResourceTags from './resource-tags';
+  import ResourceTags from './tags';
 
   export default {
     props: ['resource'],
@@ -15,7 +15,7 @@
     },
     components: {
       ResourceTags
-    }
+    },
   };
 </script>
 
@@ -25,9 +25,9 @@
       <img aria-hidden=true v-bind:src="resource.Image[0].url"/>
     </div>
     <div class="details">
-      <a v-bind:href="resource.Link" class="title">
+      <router-link :to="{ name: 'resource', params: { id: resource._id }}" class="title">
         {{ resource.Title }}
-      </a>
+      </router-link>
 
       <div class="details-grid" v-for="nameRole in nameRoles">
         <span class="role">{{ nameRole[0] }}&nbsp</span>

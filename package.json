@@ -3,7 +3,7 @@
     "lodash": "^4.17.21",
     "snowpack": "^3.5.9",
     "vue": "^3.1.2",
-    "vue-router": "^3.5.2"
+    "vue-router": "^4.0.10"
   },
   "scripts": {
     "start": "snowpack dev",

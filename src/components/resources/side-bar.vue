@@ -1,5 +1,5 @@
 <script>
-  import { createComponent } from './';
+  import { createComponent } from '../';
 
   export default createComponent();
 </script>

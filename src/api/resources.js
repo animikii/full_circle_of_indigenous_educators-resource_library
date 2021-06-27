@@ -1,21 +1,38 @@
-import { get, searchText } from './';
+import Api from './';
+
+function mapRecord(record) {
+  return { 
+    ...record.fields, 
+    _id: record.id,
+    _createdTime: record.createdTime
+  };
+}
+
+function mapRecords(records) {
+  return records.map(mapRecord);
+}
 
 const ResourceApi = { 
-  mapRecords(records) {
-    return records.map(record => {
-      return { 
-        ...record.fields, 
-        _id: record.id,
-        _createdTime: record.createdTime
-      };
-    });
-  },
-  get() {
-    return get('Resource').then(data => this.mapRecords(data.records));
+  get({ id, pageToken = ''}) {
+
+    if(id) {
+      return Api.get(`Resource/${id}`).then(mapRecord);
+    } else {
+      return Api.getAll('Resource', { pageToken }).then(data => {
+        return {
+          offset: data.offset,
+          records: mapRecords(data.records)
+        };
+      });
+    }
   },
   search(fields, text) {
-    return searchText('Resource', fields, text).then(data => this.mapRecords(data.records));
-
+    return Api.search('Resource', fields, text).then(data => {
+        return {
+          offset: data.offset,
+          records: mapRecords(data.records)
+        };
+      });
   }
 };
 

@@ -1,28 +1,101 @@
 import _ from 'lodash';
 import { reactive } from 'vue';
+import {unref} from 'vue';
 
 import ResourceApi from '../api/resources';
 
 const CACHE_TTL = 24 * 60 * 60 * 1000; // Cache items for 24 hours.
 
-const TOKEN_DIRECTIONS = {
-  NEXT: 0,
-  PREV: 1,
-};
+const START_TOKEN = 'start-';
+const ERROR_LIST_RECORDS_ITERATOR_NOT_AVAILABLE = 'LIST_RECORDS_ITERATOR_NOT_AVAILABLE';
 
+let router;
 
 const state = reactive({
   resources: [],
-  nextToken: '',
-  currentToken: '',
-  prevToken: '',
+  currentToken: createStartToken(),
   searchQuery: '',
-  pageTokenGraph: {}
+  searchFields: [
+    'Title',
+    'Description',
+    'Search Creators',
+    'Search Nation',
+    'Search Subject',
+    'Search Theme',
+    'Search Type'
+  ],
+  nextToken: '',
+  prevToken: '',
+  nextTokens: {},
+  prevTokens: {},
+  defaultRoute: {},
+  staleSession: false,
 });
 
-function setResourcePage(page) {
+function setRouter(r) {
+  router = r;
+}
+
+function getRouter() {
+  return router;
+}
+
+function getRoute() {
+  return unref(getRouter().currentRoute);
+}
+
+function createStartToken() {
+  return `${START_TOKEN}${Date.now()}`;
+}
+
+function isStartToken(token) {
+  return token && token.match(START_TOKEN);
+}
+
+function loadTokens() {
+    if(localStorage['nextTokens']) {
+      state.nextTokens = JSON.parse(localStorage['nextTokens']);
+    } else {
+      state.nextTokens = {};
+    }
+    if(localStorage['prevTokens']) {
+      state.prevTokens = JSON.parse(localStorage['prevTokens']);
+    } else {
+      state.prevTokens = {};
+    }
+}
+
+function setPagingTokens(token, page) {
+
+    if(isStartToken(token) || !token) {
+      state.prevTokens = {};
+      state.nextTokens = {};
+      if(!token) {
+        token = createStartToken();
+      }
+    } 
+
+    state.nextTokens[token] = page.offset;
+    state.prevTokens[page.offset] = token;
+    state.currentToken = token;
+
+    localStorage['nextTokens'] = JSON.stringify(state.nextTokens);
+    localStorage['prevTokens'] = JSON.stringify(state.prevTokens);
+
+    state.nextToken = state.nextTokens[state.currentToken];
+
+    if(isStartToken(state.currentToken)) {
+      state.prevToken = '';
+    } else if(!state.prevTokens[state.currentToken]) {
+      state.staleSession = true;
+    }  else {
+      state.prevToken = state.prevTokens[state.currentToken];
+    }
+}
+
+function setResourcePage(token, page) {
   state.resources = page.records;
-  state.nextToken = page.offset;
+  setPagingTokens(token, page);
 };
 
 function evictStaleCacheItems() {
@@ -30,8 +103,6 @@ function evictStaleCacheItems() {
     cacheLoad(key);
   });
 }
-
-evictStaleCacheItems();
 
 function cacheLoad(hashKey) {
   const cachedData = localStorage.getItem(hashKey);
@@ -71,10 +142,25 @@ function cacheLoadPromise(hash, onCacheMiss) {
     }
 }
 
+function handleResourcesError(error) {
+  if(error.type == ERROR_LIST_RECORDS_ITERATOR_NOT_AVAILABLE) {
+    actions.resetSession();    
+    getRouter().replace(state.defaultRoute); 
+  } 
+}
+
 const actions = {
-  associateTokens(fromToken, toToken) {
-    state.pageTokenGraph[`${TOKEN_DIRECTIONS.NEXT}::${fromToken}`] = toToken;
-    state.pageTokenGraph[`${TOKEN_DIRECTIONS.PREV}::${toToken}`] = fromToken;
+  initializeResources() {
+    evictStaleCacheItems();
+
+    const params = new URLSearchParams(window.location.href.split("?")[1]);
+
+    if(params.get('token')) {
+      state.currentToken = params.get('token');
+    }
+    state.searchQuery = params.get('search'); 
+
+    loadTokens();
   },
 
   getResource(id) {
@@ -90,18 +176,28 @@ const actions = {
   },
 
   getResourcePage(pageToken) {
+    let apiToken = pageToken;
+
+    if(isStartToken(pageToken)) {
+      apiToken = '';
+    }
+
     const hash = `GET_RESOURCE_PAGE=${pageToken}`; 
-    
+
     return cacheLoadPromise(hash, () => 
-      ResourceApi.get({ pageToken })
+      ResourceApi.get({ pageToken: apiToken })
         .then(page => {
           cachePersist(page, hash);
           return page;
         })
-    ).then(page => setResourcePage(page));
+    ).then(page => setResourcePage(pageToken, page))
+    .catch(handleResourcesError)
+;
   },
 
-  searchResources(fields, query) {
+  searchResources() {
+    const fields = state.searchFields;
+    const query = state.searchQuery;
     const searchQuery = JSON.stringify({fields, query});
     const hash = `SEARCH_RESOURCES=${searchQuery}`;
 
@@ -112,11 +208,20 @@ const actions = {
           return page;
         })
     ).then(page => {
-      setResourcePage(page);
-      state.currentToken = '';
-    });
-  }
+      setResourcePage(createStartToken(), page);
+    }).catch(handleResourcesError);
+  },
+
+  resetSession() {
+    localStorage.clear();
+
+    localStorage.removeItem('nextTokens');
+    localStorage.removeItem('prevTokens');
+    state.nextTokens = {};
+    state.prevTokens = {};
+    state.currentToken = createStartToken();
+  },
 };
 
-export default { state, actions };
+export default { state, actions, isStartToken, createStartToken, setRouter };
 

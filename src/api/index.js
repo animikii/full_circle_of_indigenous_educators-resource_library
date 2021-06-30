@@ -5,12 +5,22 @@ import store from '../store';
 const BASE_URL = 'https://api.airtable.com/v0/appuVy798hQyevSty';
 const API_KEY = 'keyHcUQA9jlV08F7o';
 const SORT ='&sort%5B0%5D%5Bfield%5D=Title&sort%5B0%5D%5Bdirection%5D=asc';
-const PAGE_SIZE = 6;
+const SORT_REV ='&sort%5B0%5D%5Bfield%5D=Title&sort%5B0%5D%5Bdirection%5D=desc';
+const PAGE_SIZE = 2;
+
+const ERRORS = {
+  LIST_RECORDS_ITERATOR_NOT_AVAILABLE: 'LIST_RECORDS_ITERATOR_NOT_AVAILABLE'
+};
 
 const throttledFetch = _.throttle((url, resolve, reject) => {
     return fetch(url)
-      .then(response => resolve(response))
-      .catch(error => reject(error));
+      .then(response => {
+        if(200 <= response.status && response.status <= 299) {
+          response.json().then(data => resolve(data));
+        } else {
+          response.json().then(data => reject(data.error));
+        }
+      });
   },
   1000
 );
@@ -20,15 +30,19 @@ const call = (url) => {
     throttledFetch(url, resolve, reject);
   });
 }
+/*
+const handleExpiredIterator = (error) => {
+  if(error.type == ERRORS.LIST_RECORDS_ITERATOR_NOT_AVAILABLE) {
+
+  } 
+};*/
 
 function get(resource) {
   return call(`${BASE_URL}/${resource}?api_key=${API_KEY}`)
-    .then(response => response.json());
 }
 
-function getAll(resource, { pageToken = ''} ) {
+function getAll(resource, { pageToken = '', sort = SORT } ) {
   return call(`${BASE_URL}/${resource}?api_key=${API_KEY}${SORT}&pageSize=${PAGE_SIZE}&offset=${pageToken}`)
-    .then(response => response.json());
 }
 
 function search(resource, fields, text) {
@@ -43,7 +57,6 @@ function search(resource, fields, text) {
   ].join('&');
 
   return call(`${BASE_URL}/${resource}?${queryParams}`)
-    .then(response => response.json());
 }
 
 export default { get, getAll, search }

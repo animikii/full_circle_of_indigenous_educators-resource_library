@@ -1,17 +1,14 @@
 import { createApp } from 'vue/dist/vue.esm-bundler.js';
 import { createRouter, createWebHashHistory } from 'vue-router';
 
+import store from './store';
 
 import Root from './components/root';
-import ResourcesPage from './components/resources/page';
-import ResourcePage, { route as resourceRoute } from './components/resource/page';
+import { route as resourcesRoute } from './components/resources/page';
+import { route as resourceRoute } from './components/resource/page';
 
 const routes = [
-  { 
-    path: '/',
-    component: ResourcesPage,
-    name: 'resources'
-  },
+  resourcesRoute,
   resourceRoute
 ];
 
@@ -19,6 +16,8 @@ const router = createRouter({
   history: createWebHashHistory(),
   routes
 });
+
+store.setRouter(router);
 
 var e = document.querySelector("#app");
 

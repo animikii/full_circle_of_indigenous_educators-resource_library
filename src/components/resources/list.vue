@@ -5,25 +5,23 @@
   import ResourceItem from './list-item';
 
   export default createComponent({
+    props: ["loading"],
     components: {
       ResourceItem,
-    }
+    },
   });
 </script>
 
 <template>
   <div class="resource-list-container">
+      <div v-if='!resources.length && !loading' class='not-found'>
+        No resources found.
+      </div>
       <ul class='resource-list'>
         <li v-for="resource in resources">
           <ResourceItem v-bind:resource="resource"></ResourceItem>
         </li>
       </ul>
-    <div class='pagination'>
-      <a href='#'>Previous</a>
-      <router-link v-if='nextToken' :to="{ name: 'resources', query: { next: nextToken }}">
-        Next
-      </router-link>
-    </div>
   </div>
 </template>
 
@@ -51,10 +49,8 @@
     display: block;
   }
 
-  .resource-list-container .pagination {
-    display: flex;
-    justify-content: space-between;
-    max-width: 150px;
-    margin: auto;
+  .resource-list-container .not-found {
+    font-size: 1.5em;
+    font-weight: bold; 
   }
 </style>

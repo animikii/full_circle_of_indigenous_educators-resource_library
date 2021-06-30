@@ -16,10 +16,11 @@
     methods: {
       search(e) {
         this.searchQuery = e.target.value;
+        this.currentToken = '';
 
         this.$router.replace({
           name: 'resources',
-          query: { search: this.searchQuery }
+          query: { search: this.searchQuery, token: this.currentToken }
         });
       }
     },

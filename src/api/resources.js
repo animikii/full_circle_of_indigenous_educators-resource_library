@@ -1,5 +1,6 @@
 import Api from './';
 
+
 function mapRecord(record) {
   return { 
     ...record.fields, 
@@ -14,7 +15,6 @@ function mapRecords(records) {
 
 const ResourceApi = { 
   get({ id, pageToken = ''}) {
-
     if(id) {
       return Api.get(`Resource/${id}`).then(mapRecord);
     } else {
@@ -36,4 +36,4 @@ const ResourceApi = {
   }
 };
 
-export default ResourceApi;
+export default { ...ResourceApi };

@@ -1,8 +1,16 @@
+<script>
+  import { createComponent } from './';
+
+  export default createComponent({
+    computed: {
+    }
+  });
+</script>
 <template>
-  <router-link v-if='$route.name != "resources"' :to="{ path: '/' }" class='link-home'>
-    <h1 class="resource-header">Resource Library</h1>
+  <h1 class="resource-header">Resource Library</h1>
+  <router-link v-if='$route.name != "resources"' :to="{ name: 'resources', query: { search: searchQuery, token: currentToken }}" class='link-home'>
+    <h1 class="resource-header">Back</h1>
   </router-link>
-  <h1 v-if='$route.name == "resources"' class="resource-header">Resource Library</h1>
 
 </template>
 

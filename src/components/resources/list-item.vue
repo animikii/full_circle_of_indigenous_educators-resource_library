@@ -1,31 +1,52 @@
 <script>
   import _ from 'lodash';
 
+  import { createComponent } from '../';
   import ResourceTags from '../tags';
 
-  export default {
-    props: ['resource'],
+  const PREVIEW_DESCRIPTION_LENGTH = 30;
+
+  export default createComponent({
+    props: {
+      resource: Object,
+      expanded: {
+        type: Boolean,
+        default: false
+      }
+    },
     computed: {
       nameRoles: function() {
         return _.zip(
           this.resource['Creator Roles'],
           this.resource['Creators Display Name']
         );
-      } 
+      },
+      description() {
+        if(!this.resource.Description) {
+          return;
+        }
+
+        const words = this.resource.Description.split(" ");
+        if(!this.expanded && words.length > PREVIEW_DESCRIPTION_LENGTH) {
+          return words.slice(0, PREVIEW_DESCRIPTION_LENGTH).join(" ") + "...";
+        } else {
+          return this.resource.Description;
+        }
+      }
     },
     components: {
       ResourceTags
     },
-  };
+  });
 </script>
 
 <template>
-  <div class="resource-tile">
+  <div :class="`resource-tile ${expanded ? 'expanded' : ''}`">
     <div class="image">
-      <img aria-hidden=true v-bind:src="resource.Image[0].url"/>
+      <img v-if="resource.Image && resource.Image" aria-hidden=true v-bind:src="resource.Image[0].url"/>
     </div>
     <div class="details">
-      <router-link v-if='$route.name == "resources"' :to="{ name: 'resource', params: { id: resource._id }}" class="title">
+      <router-link v-if='$route.name == "resources"' :to="{ name: 'resource', params: { id: resource._id }, query: { search: searchQuery, token: currentToken} }" class="title">
         {{ resource.Title }}
       </router-link>
       <span v-if='$route.name != "resources"' :to="{ name: 'resource', params: { id: resource._id }}" class="title inactive">
@@ -59,6 +80,17 @@
           category="Age Range"
           v-bind:tags="resource['Age Range']"></ResourceTags>
 
+        <div class='description'>
+          <div>
+            {{ description }}
+          </div>
+          <div>
+            <a v-if='resource.Link' v-bind:href="resource.Link" class="resource-link">
+              Link to Resource
+            </a>
+          </div>
+        </div>
+
         <slot></slot>
       </div>
     </div>
@@ -85,6 +117,7 @@
     object-position: center;
     width: 100%;
     max-height: 100%;
+    max-height: 300px;
   }
 
   .resource-tile .details {
@@ -133,5 +166,34 @@
     grid-template-columns: 1fr 3fr;  
     row-gap: 8xp;
   }
+
+  .resource-tile .description {
+    white-space: pre-line;
+    grid-column-start: 1;
+    grid-column-end: 3;
+    margin-top: 8px;
+  }
+
+  .resource-tile.expanded .details {
+    padding-top: 0;
+  }
+
+  .resource-tile.expanded .image {
+    margin: 0;
+  }
+
+  .resource-tile .resource-link {
+    font-size: 1.15em;
+    font-weight: bold;
+    color: var(--color-primary);
+    margin: 8px 0px;
+    display: block;
+    text-decoration: none;
+  }  
+
+  .resource-tile .resource-link:focus, .resource-tile .resource-link:hover {
+    text-decoration: underline;
+  }
+
 
 </style>

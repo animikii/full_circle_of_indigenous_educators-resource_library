@@ -176,13 +176,16 @@ const actions = {
   },
 
   getResourcePage() {
-    if(state.searchQuery && isStartToken(state.currentToken)) {
-      console.log('search');
-      this.searchResources();
+    const isSearch = state.searchQuery ? true: false;
+    let apiCall;
+
+    if(isSearch  && isStartToken(state.currentToken)) {
+      apiCall = this.searchResources();
     } else {
-      console.log('load');
-      this.getResources();
+      apiCall = this.getResources();
     }
+
+    apiCall.catch(handleResourcesError);
   },
 
   getResources() {
@@ -201,9 +204,7 @@ const actions = {
           cachePersist(page, hash);
           return page;
         })
-    ).then(page => setResourcePage(pageToken, page))
-    .catch(handleResourcesError)
-;
+    ).then(page => setResourcePage(pageToken, page));
   },
 
   searchResources() {
@@ -220,7 +221,7 @@ const actions = {
         })
     ).then(page => {
       setResourcePage(createStartToken(), page);
-    }).catch(handleResourcesError);
+    })
   },
 
 

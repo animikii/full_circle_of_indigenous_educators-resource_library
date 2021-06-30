@@ -25,41 +25,18 @@
       }
     },
     methods: {
-      initResources() {
-        this.searchQuery = this.$route.query.search;
-
-        if(this.$route.query.token) {
-          this.currentToken = this.$route.query.token;
-        }
-
-        if(this.searchQuery && store.isStartToken(this.currentToken)) {
-          this.searchResources(); 
-        } else {
-          this.loadResources(this.currentToken);
-        }
-      },
-      searchResources() {
-        this.loading = true;
-
-        store.actions.searchResources()
-          .then(() => this.loading = false);
-
-      },
-      loadResources(token) {
-        this.loading = true;
-
-        store.actions.getResourcePage(token)
-          .finally(() => this.loading = false);
-      },
     },
     created() {
-      this.initResources();
+      store.actions.getResourcePage();
 
       this.$watch(
         () => this.$route.query,
         (to, from ) => {
           if(this.$route.name == 'resources') {
-            this.initResources();
+            if(this.$route.query.token) {
+              this.currentToken = this.$route.query.token;
+            }
+            store.actions.getResourcePage();
           }
         }
       );

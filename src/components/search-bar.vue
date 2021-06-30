@@ -16,7 +16,7 @@
     methods: {
       search(e) {
         this.searchQuery = e.target.value;
-        this.currentToken = '';
+        this.currentToken = store.createStartToken(); 
 
         this.$router.replace({
           name: 'resources',

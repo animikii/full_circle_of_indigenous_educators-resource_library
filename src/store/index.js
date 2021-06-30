@@ -175,14 +175,25 @@ const actions = {
     );
   },
 
-  getResourcePage(pageToken) {
-    let apiToken = pageToken;
+  getResourcePage() {
+    if(state.searchQuery && isStartToken(state.currentToken)) {
+      console.log('search');
+      this.searchResources();
+    } else {
+      console.log('load');
+      this.getResources();
+    }
+  },
+
+  getResources() {
+    let pageToken = state.currentToken;
+    let apiToken = pageToken; 
 
     if(isStartToken(pageToken)) {
       apiToken = '';
     }
 
-    const hash = `GET_RESOURCE_PAGE=${pageToken}`; 
+    const hash = `GET_RESOURCE_PAGE=${apiToken}`; 
 
     return cacheLoadPromise(hash, () => 
       ResourceApi.get({ pageToken: apiToken })
@@ -211,6 +222,7 @@ const actions = {
       setResourcePage(createStartToken(), page);
     }).catch(handleResourcesError);
   },
+
 
   resetSession() {
     localStorage.clear();

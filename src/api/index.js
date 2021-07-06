@@ -59,13 +59,36 @@ function getAll(resource, { pageToken = '', sort = '', fields='', pageSize = PAG
     .then(mapRecords);
 }
 
-function search(resource, fields, text, { sort = '', pageSize = PAGE_SIZE } = {}) {
-  const searchFields = fields.map(field => `SEARCH("${text.toLowerCase()}", LOWER({${field}}))`).join(',');
-  const formula = `OR(${searchFields})`;
+function search(resource, fieldQueries, { sort = '', pageSize = PAGE_SIZE } = {}) {
+  console.log(fieldQueries);
+
+  const createFieldFormula = fieldQuery => {
+    const fieldSearch = fieldQuery.query.map(query => {
+      return `SEARCH("${query.toLowerCase()}", LOWER({${fieldQuery.field}}))`;
+    }).join(',');
+    return `AND(${fieldSearch})`; 
+  };
+
+  let conjunctiveQueries = fieldQueries.filter(fq => fq.conjunctive)
+    .map(createFieldFormula);
+
+  let disjunctiveQueries = fieldQueries.filter(fq => !fq.conjunctive)
+    .map(createFieldFormula);
+
+  let formulas = [];
+
+  if(disjunctiveQueries.length) {
+    formulas.push(`OR(${disjunctiveQueries})`);
+  }
+  if(conjunctiveQueries.length) {
+    formulas.push(conjunctiveQueries);
+  }
+  
+  const filterFormula = `AND(${formulas.join(',')})`;
 
   const queryParams = [
     `api_key=${API_KEY}`,
-    `filterByFormula=${encodeURI(formula)}`,
+    `filterByFormula=${encodeURI(filterFormula)}`,
     `&pageSize=${pageSize}`,
     sort
   ].join('&');

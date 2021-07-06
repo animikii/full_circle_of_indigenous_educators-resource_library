@@ -10,8 +10,8 @@ const ResourceApi = {
       return Api.getAll('Resource', { pageToken, sort: SORT });
     }
   },
-  search(fields, text) {
-    return Api.search('Resource', fields, text, { sort: SORT});
+  search(fieldQueries) {
+    return Api.search('Resource', fieldQueries, { sort: SORT});
   }
 };
 

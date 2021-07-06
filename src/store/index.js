@@ -11,6 +11,18 @@ const CACHE_TTL = 24 * 60 * 60 * 1000; // Cache items for 24 hours.
 const START_TOKEN = 'start-';
 const ERROR_LIST_RECORDS_ITERATOR_NOT_AVAILABLE = 'LIST_RECORDS_ITERATOR_NOT_AVAILABLE';
 
+const SEARCH_PREFIX = 'Search ';
+
+const DEFAULT_FIELDS = [
+ 'Title',
+ 'Description',
+ SEARCH_PREFIX + 'Creators',
+ SEARCH_PREFIX + 'Nation',
+ SEARCH_PREFIX + 'Subject',
+ SEARCH_PREFIX + 'Theme',
+ SEARCH_PREFIX + 'Type'
+];
+
 let router;
 
 const state = reactive({
@@ -19,15 +31,7 @@ const state = reactive({
   resources: [],
   currentToken: createStartToken(),
   searchQuery: '',
-  searchFields: [
-    'Title',
-    'Description',
-    'Search Creators',
-    'Search Nation',
-    'Search Subject',
-    'Search Theme',
-    'Search Type'
-  ],
+  searchFields: [...DEFAULT_FIELDS],
   filters: [],
   categoryTypes: [],
   categories: {},
@@ -145,7 +149,10 @@ function cacheLoadPromise(hash, onCacheMiss) {
     if(cached) {
       return Promise.resolve(cached);
     } else {
-      return onCacheMiss();
+      return onCacheMiss().then(data => {
+        cachePersist(data, hash);
+        return data;
+      });
     }
 }
 
@@ -192,7 +199,10 @@ const actions = {
     loadTokens();
   },
   initializeFilters() {
-    CategoriesApi.getIndex().then(
+    const hash = "CATEGORY_FILTERS";
+    cacheLoadPromise(hash, () => 
+      CategoriesApi.getIndex()
+    ).then(
       types => state.categoryTypes = types 
     );
   },
@@ -202,14 +212,19 @@ const actions = {
     );
   },
   setFilter(field, value) {
-    state.filters.push({
-      type: field,
-      value
-    });
+    const filterExists = state.filters.find(f => f.value === value && f.type === field);
+    
+    if(!filterExists) {
+      state.filters.push({
+        type: field,
+        value
+      });
+    }
     this.getResourcePage();
   },
   removeFilter(filter) {
     state.filters = state.filters.filter(f => f != filter);
+    this.getResourcePage();
   },
 
   getResource(id) {
@@ -221,14 +236,10 @@ const actions = {
       if(!state.reviews[id]) {
         const reviewsHash = `GET_REVIEWS=${id}`;
 
-        cacheLoadPromise(reviewsHash, () => 
-          ReviewsApi.get(id).then(reviews => {
-            cachePersist(reviews, reviewsHash); 
-            return reviews;
-          })
-        ).then(reviews => {
-          state.reviews[id] = reviews
-        });
+        cacheLoadPromise(reviewsHash, () => ReviewsApi.get(id))
+          .then(reviews => {
+            state.reviews[id] = reviews
+          });
       }
     };
 
@@ -238,26 +249,15 @@ const actions = {
 
     const hash = `GET_RESOURCE=${id}`;
   
-    return cacheLoadPromise(hash, () => 
-      ResourceApi.get({id})
-        .then(result => {
-          cachePersist(result, hash);
-          return result;
-        })
-    ).then(resource => state.currentResource = resource)
-    .then(getReviews);
+    return cacheLoadPromise(hash, () => ResourceApi.get({id}))
+      .then(resource => state.currentResource = resource)
+      .then(getReviews);
   },
 
   getReviews(resourceId) {
     const hash = `GET_REVIEWS=${resourceId}`;
   
-    return cacheLoadPromise(hash, () => 
-      ResourceApi.get({id})
-        .then(result => {
-          cachePersist(result, hash);
-          return result;
-        })
-    );
+    return cacheLoadPromise(hash, () => ResourceApi.get({id}));
   },
 
   getResourcePage() {
@@ -283,30 +283,45 @@ const actions = {
 
     const hash = `GET_RESOURCE_PAGE=${apiToken}`; 
 
-    return cacheLoadPromise(hash, () => 
-      ResourceApi.get({ pageToken: apiToken })
-        .then(page => {
-          cachePersist(page, hash);
-          return page;
-        })
-    ).then(page => setResourcePage(pageToken, page));
+    return cacheLoadPromise(hash, () => ResourceApi.get({ pageToken: apiToken }))
+      .then(page => setResourcePage(pageToken, page));
   },
 
   searchResources() {
-    const fields = state.searchFields;
     const query = state.searchQuery || '';
-    const searchQuery = JSON.stringify({fields, query});
-    const hash = `SEARCH_RESOURCES=${searchQuery}`;
+    console.log(query);
 
-    return cacheLoadPromise(hash, () => 
-      ResourceApi.search(fields, query)
-        .then(page => {
-          cachePersist(page, hash)
-          return page;
-        })
-    ).then(page => {
-      setResourcePage(createStartToken(), page);
-    })
+    const filterQueries = state.searchFields.map(field => {
+      const matchingFilters = state.filters.filter(
+        filter => SEARCH_PREFIX + filter.type === field
+      );
+
+      if(matchingFilters.length) {
+        return {
+          conjunctive: true,
+          field,
+          query: [...matchingFilters.map(filter => filter.value)]
+        };
+      }
+    }).filter(fq => fq);
+
+    let searchQueries = [];
+
+    if(query) {
+      searchQueries = state.searchFields.map(field => {
+        return {
+          conjunctive: false,
+          field, 
+          query: [query]
+        }
+      });
+    }
+
+    const queries = [ ...searchQueries, ...filterQueries ];
+    const hash = `SEARCH_RESOURCES=${JSON.stringify(queries)}`;
+
+    return cacheLoadPromise(hash, () => ResourceApi.search(queries))
+      .then(page => { setResourcePage(createStartToken(), page); })
   },
   resetSession() {
     localStorage.clear();

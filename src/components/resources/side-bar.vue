@@ -58,11 +58,13 @@
       </div>
       <ul>
         <li v-for="filter in filters">
-          {{ filter.value }}
+          <div class="filter-pill">
+            {{ filter.value }}
 
-          <span v-on:click="removeFilter(filter)">
-            X
-          </span>
+            <span class="remove-filter" v-on:click="removeFilter(filter)">
+              X
+            </span>
+          </div>
 
         </li>
       </ul> 
@@ -122,14 +124,30 @@
 <style>
   #side-bar {
     width: 200px;
-    height: 400px;
     margin-top: 2em;
+  }
+
+  .side-bar-filters ul {
+    padding: 0; 
+  }
+
+  .side-bar-filters li {
+    display: block;
   }
 
   .filter-header {
     text-transform: uppercase;
     margin-bottom: 8px;
     font-weight: bold;
+  }
+
+  .filter-pill {
+    background: #ddd;
+    padding: 8px 16px; 
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
   }
 
   .category-header {
@@ -144,7 +162,7 @@
     -ms-user-select: none;
   }
 
-  .category-header:hover, .category-header:active, .category-header:focus {
+  .category-header:hover {
     cursor: pointer;
   }
 
@@ -156,4 +174,13 @@
   .category li {
     display: block;
   }  
+
+  .category li:hover {
+    cursor: pointer;
+  }
+
+  .remove-filter:hover {
+    font-weight: bold;
+    cursor: pointer;
+  }
 </style>

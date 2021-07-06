@@ -1,8 +1,8 @@
-<script>
-  import _ from 'lodash';
+<script> import _ from 'lodash';
 
   import { createComponent } from '../';
   import ResourceTags from '../tags';
+  import Star from '../star';
 
   const PREVIEW_DESCRIPTION_LENGTH = 30;
 
@@ -12,6 +12,13 @@
       expanded: {
         type: Boolean,
         default: false
+      }
+    },
+    methods: {
+      formatTags(tags) {
+        if(tags) {
+          return tags.map(tag => tag.split(',')[0]);
+        }
       }
     },
     computed: {
@@ -35,7 +42,8 @@
       }
     },
     components: {
-      ResourceTags
+      ResourceTags,
+      Star
     },
   });
 </script>
@@ -44,6 +52,12 @@
   <div :class="`resource-tile ${expanded ? 'expanded' : ''}`">
     <div class="image">
       <img v-if="resource.Image && resource.Image" aria-hidden=true v-bind:src="resource.Image[0].url"/>
+      <div v-if="!resource.Image" style="padding: 1em; padding-top: 0; text-align: center;  display: flex; flex-direction: column; justify-content: center; align-items: center;">
+        <img src="logo.png" style="object-position: top"/>
+        <span style="margin-top: -24px;">
+          No Image Submitted
+        </span>
+      </div>
     </div>
     <div class="details">
       <router-link v-if='$route.name == "resources"' :to="{ name: 'resource', params: { id: resource._id }, query: { search: searchQuery, token: currentToken} }" class="title">
@@ -55,8 +69,8 @@
 
 
       <div class="details-grid" v-for="nameRole in nameRoles">
-        <span class="role">{{ nameRole[0] }}&nbsp</span>
-        <span class="name">{{ nameRole[1] }}</span>
+        <div class="role">{{ nameRole[0] }}</div>
+        <div class="name">{{ nameRole[1] }}</div>
       </div>
 
       <div class="details-grid">
@@ -70,15 +84,19 @@
 
         <ResourceTags
           category="Theme"
-          v-bind:tags="resource['Theme Lookup']"></ResourceTags>
+          v-bind:tags="formatTags(resource['Theme Lookup'])"></ResourceTags>
 
         <ResourceTags
           category="Nation"
           v-bind:tags="resource['Nation Lookup']"></ResourceTags>
 
         <ResourceTags
-          category="Age Range"
+          category="Age"
           v-bind:tags="resource['Age Range']"></ResourceTags>
+
+        <div style="font-weight: bold">Rating</div>
+        <Star v-if='resource.Rating' v-bind:rating='resource.Rating'></Star>
+        <span v-if='!resource.Rating'> No Reviews</span>
 
         <div class='description'>
           <div>
@@ -90,9 +108,9 @@
             </a>
           </div>
         </div>
-
-        <slot></slot>
       </div>
+
+      <slot></slot>
     </div>
   </div>
 </template>
@@ -125,6 +143,7 @@
     display: flex;
     flex-direction: column;
     padding: 1em;
+    padding-top: 0;
   }
 
 
@@ -163,8 +182,9 @@
 
   .resource-tile .details-grid {
     display: grid;
-    grid-template-columns: 1fr 3fr;  
-    row-gap: 8xp;
+    grid-template-columns: 25% 75%;  
+    row-gap: 4px;
+    column-gap: 8px;
   }
 
   .resource-tile .description {

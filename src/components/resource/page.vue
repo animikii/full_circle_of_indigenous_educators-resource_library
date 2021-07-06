@@ -5,36 +5,41 @@
   import { createComponent } from '../';
   import LoadingSpinner from '../loading-spinner';
   import ResourceItem from '../resources/list-item';
+  import Review from './review';
+  import ReviewSubmission from './review-submission';
 
   const ResourcePage = createComponent({
     data() {
       return {
         loading: false,
-        resource: undefined
       }
     },
     computed: {
       resourceId() {
         return this.$route.params.id;
-      } 
+      },
+      resourceReviews () {
+        let reviews =  this.reviews[this.resourceId];
+
+        if(reviews) {
+          return reviews;
+        } else {
+          return [];
+        }
+      }
     },
     mounted() {
-      this.resource = this.resources.find(
-        resource => resource._id === this.resourceId
-      );
-
-      if(!this.resource) {
-        this.loading = true;
-        store.actions.getResource(this.resourceId)
-          .then(resource => this.resource = resource)
-          .then(() => this.loading = false);
-      }
+      this.loading = true;
+      store.actions.getResource(this.resourceId)
+        .finally(() => this.loading = false);
     },
     created() {
     },
     components: {
       LoadingSpinner,
       ResourceItem,
+      Review,
+      ReviewSubmission,
     },
   })
 
@@ -51,8 +56,31 @@
 
 <template>
   <LoadingSpinner v-bind:enabled="loading"></LoadingSpinner> 
-  <div v-if="resource" class='resource-page'>
-    <ResourceItem v-bind:expanded="true" v-bind:resource="resource"></ResourceItem>
+  <div v-if="currentResource" class='resource-page'>
+    <ResourceItem v-bind:expanded="true" v-bind:resource="currentResource">
+      <h2 class='review-header'>Reviews</h2>
+
+      <div v-if='!resourceReviews.length'>
+        No reviews have been posted for this resource.
+      </div>
+      <div v-for='review in resourceReviews' class='reviews'>
+        <Review v-bind:review='review'></Review>
+      </div>
+      <ReviewSubmission class="review-submission"></ReviewSubmission>
+    </ResourceItem>
   </div>
 </template>
 
+<style>
+  .reviews {
+  }
+
+  .review-header {
+    font-size: var(--header-size);
+    margin-bottom: 8px;
+  }
+
+  .review-submission {
+    margin-top: 8px;
+  }
+</style>

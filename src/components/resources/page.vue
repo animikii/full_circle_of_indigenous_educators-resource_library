@@ -27,7 +27,9 @@
     methods: {
     },
     created() {
-      store.actions.getResourcePage();
+      this.loading = true;
+
+      store.actions.getResourcePage().finally(() => this.loading = false);
 
       this.$watch(
         () => this.$route.query,
@@ -36,7 +38,8 @@
             if(this.$route.query.token) {
               this.currentToken = this.$route.query.token;
             }
-            store.actions.getResourcePage();
+            this.loading = true;
+            store.actions.getResourcePage().finally(() => this.loading = false);
           }
         }
       );
@@ -65,12 +68,20 @@
     <LoadingSpinner v-bind:enabled='loading' fill='black'> </LoadingSpinner>
     <Pagination v-bind:defaultRoute="route" class='resources-pagination'></Pagination>
   </SearchBar>
-  <ResourceList v-bind:loading="loading"></ResourceList>
+
+  <div class='resources-page-content'>
+    <SideBar></SideBar>
+    <ResourceList v-bind:loading="loading"></ResourceList>
+  </div>
 </template>
 
 <style>
   .resources-pagination {
     float: right;
+  }
+
+  .resources-page-content {
+    display: flex;
   }
 </style>
 

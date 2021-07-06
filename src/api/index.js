@@ -4,9 +4,12 @@ import store from '../store';
 
 const BASE_URL = 'https://api.airtable.com/v0/appuVy798hQyevSty';
 const API_KEY = 'keyHcUQA9jlV08F7o';
-const SORT ='&sort%5B0%5D%5Bfield%5D=Title&sort%5B0%5D%5Bdirection%5D=asc';
-const SORT_REV ='&sort%5B0%5D%5Bfield%5D=Title&sort%5B0%5D%5Bdirection%5D=desc';
-const PAGE_SIZE = 2;
+const PAGE_SIZE = 8;
+
+const SORT = {
+  RESOURCES_ASC: '&sort%5B0%5D%5Bfield%5D=Title&sort%5B0%5D%5Bdirection%5D=asc',
+  REVIEWS_ASC: '&sort%5B0%5D%5Bfield%5D=createdTime&sort%5B0%5D%5Bdirection%5D=desc'
+}
 
 const ERRORS = {
   LIST_RECORDS_ITERATOR_NOT_AVAILABLE: 'LIST_RECORDS_ITERATOR_NOT_AVAILABLE'
@@ -30,33 +33,45 @@ const call = (url) => {
     throttledFetch(url, resolve, reject);
   });
 }
-/*
-const handleExpiredIterator = (error) => {
-  if(error.type == ERRORS.LIST_RECORDS_ITERATOR_NOT_AVAILABLE) {
 
-  } 
-};*/
+function mapRecord(record) {
+  return { 
+    ...record.fields, 
+    _id: record.id,
+    _createdTime: record.createdTime
+  };
+}
+
+function mapRecords(data) {
+  return {
+    offset: data.offset,
+    records: data.records.map(mapRecord)
+  };
+}
 
 function get(resource) {
   return call(`${BASE_URL}/${resource}?api_key=${API_KEY}`)
+    .then(mapRecord);
 }
 
-function getAll(resource, { pageToken = '', sort = SORT } ) {
-  return call(`${BASE_URL}/${resource}?api_key=${API_KEY}${SORT}&pageSize=${PAGE_SIZE}&offset=${pageToken}`)
+function getAll(resource, { pageToken = '', sort = '', fields='', pageSize = PAGE_SIZE } = {} ) {
+  return call(`${BASE_URL}/${encodeURIComponent(resource)}?api_key=${API_KEY}${sort}&pageSize=${pageSize}&offset=${pageToken}${fields}`)
+    .then(mapRecords);
 }
 
-function search(resource, fields, text) {
+function search(resource, fields, text, { sort = '', pageSize = PAGE_SIZE } = {}) {
   const searchFields = fields.map(field => `SEARCH("${text.toLowerCase()}", LOWER({${field}}))`).join(',');
   const formula = `OR(${searchFields})`;
 
   const queryParams = [
     `api_key=${API_KEY}`,
     `filterByFormula=${encodeURI(formula)}`,
-    `&pageSize=${PAGE_SIZE}`,
-    SORT
+    `&pageSize=${pageSize}`,
+    sort
   ].join('&');
 
   return call(`${BASE_URL}/${resource}?${queryParams}`)
+    .then(mapRecords);
 }
 
-export default { get, getAll, search }
+export default { get, getAll, search, SORT }

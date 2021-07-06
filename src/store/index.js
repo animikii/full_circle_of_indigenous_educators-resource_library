@@ -3,6 +3,8 @@ import { reactive } from 'vue';
 import {unref} from 'vue';
 
 import ResourceApi from '../api/resources';
+import ReviewsApi from '../api/reviews';
+import CategoriesApi from '../api/categories';
 
 const CACHE_TTL = 24 * 60 * 60 * 1000; // Cache items for 24 hours.
 
@@ -12,6 +14,8 @@ const ERROR_LIST_RECORDS_ITERATOR_NOT_AVAILABLE = 'LIST_RECORDS_ITERATOR_NOT_AVA
 let router;
 
 const state = reactive({
+  currentResource: null,
+  reviews: {},
   resources: [],
   currentToken: createStartToken(),
   searchQuery: '',
@@ -24,12 +28,15 @@ const state = reactive({
     'Search Theme',
     'Search Type'
   ],
+  filters: [],
+  categoryTypes: [],
+  categories: {},
   nextToken: '',
   prevToken: '',
   nextTokens: {},
   prevTokens: {},
   defaultRoute: {},
-  staleSession: false,
+  notifications: [],
 });
 
 function setRouter(r) {
@@ -143,15 +150,37 @@ function cacheLoadPromise(hash, onCacheMiss) {
 }
 
 function handleResourcesError(error) {
+  const clearNotification = (notification) => {
+    state.notifications = state.notifications.filter(n => {
+      n.id != notification.id
+    });
+  };
+  
   if(error.type == ERROR_LIST_RECORDS_ITERATOR_NOT_AVAILABLE) {
-    actions.resetSession();    
-    getRouter().replace(state.defaultRoute); 
+    state.nextToken = '';
+    state.prevToken = '';
+
+    const notification = {
+      id: Math.random(),
+      message: 'Session timed out!',
+      actionLabel: 'Reset Search',
+    };
+
+    notification.action = () => {
+      actions.resetSession();    
+      getRouter().replace(state.defaultRoute); 
+      clearNotification(notification);
+    };
+
+    state.notifications.push(notification);
   } 
 }
 
 const actions = {
-  initializeResources() {
+  initialize() {
     evictStaleCacheItems();
+  },
+  initializeResources() {
 
     const params = new URLSearchParams(window.location.href.split("?")[1]);
 
@@ -162,9 +191,65 @@ const actions = {
 
     loadTokens();
   },
+  initializeFilters() {
+    CategoriesApi.getIndex().then(
+      types => state.categoryTypes = types 
+    );
+  },
+  initializeFilter(categoryType) {
+    CategoriesApi.get(categoryType).then(categories =>
+      state.categories[categoryType] = categories
+    );
+  },
+  setFilter(field, value) {
+    state.filters.push({
+      type: field,
+      value
+    });
+    this.getResourcePage();
+  },
+  removeFilter(filter) {
+    state.filters = state.filters.filter(f => f != filter);
+  },
 
   getResource(id) {
+    state.currentResource = state.resources.find(
+      resource => resource._id === id 
+    );
+
+    const getReviews = () => {
+      if(!state.reviews[id]) {
+        const reviewsHash = `GET_REVIEWS=${id}`;
+
+        cacheLoadPromise(reviewsHash, () => 
+          ReviewsApi.get(id).then(reviews => {
+            cachePersist(reviews, reviewsHash); 
+            return reviews;
+          })
+        ).then(reviews => {
+          state.reviews[id] = reviews
+        });
+      }
+    };
+
+    if(state.currentResource) {
+      return Promise.resolve(state.currentResource).then(getReviews);
+    }
+
     const hash = `GET_RESOURCE=${id}`;
+  
+    return cacheLoadPromise(hash, () => 
+      ResourceApi.get({id})
+        .then(result => {
+          cachePersist(result, hash);
+          return result;
+        })
+    ).then(resource => state.currentResource = resource)
+    .then(getReviews);
+  },
+
+  getReviews(resourceId) {
+    const hash = `GET_REVIEWS=${resourceId}`;
   
     return cacheLoadPromise(hash, () => 
       ResourceApi.get({id})
@@ -176,7 +261,7 @@ const actions = {
   },
 
   getResourcePage() {
-    const isSearch = state.searchQuery ? true: false;
+    const isSearch = state.searchQuery || state.filters.length;
     let apiCall;
 
     if(isSearch  && isStartToken(state.currentToken)) {
@@ -185,7 +270,7 @@ const actions = {
       apiCall = this.getResources();
     }
 
-    apiCall.catch(handleResourcesError);
+    return apiCall.catch(handleResourcesError);
   },
 
   getResources() {
@@ -209,7 +294,7 @@ const actions = {
 
   searchResources() {
     const fields = state.searchFields;
-    const query = state.searchQuery;
+    const query = state.searchQuery || '';
     const searchQuery = JSON.stringify({fields, query});
     const hash = `SEARCH_RESOURCES=${searchQuery}`;
 
@@ -223,8 +308,6 @@ const actions = {
       setResourcePage(createStartToken(), page);
     })
   },
-
-
   resetSession() {
     localStorage.clear();
 

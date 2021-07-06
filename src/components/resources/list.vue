@@ -36,7 +36,7 @@
 
   .resource-list {
     display: grid;
-    grid-template-columns: 50% 50%; 
+    grid-template-columns: 1fr 1fr; 
     grid-auto-rows: auto;
     row-gap: 1em;
 

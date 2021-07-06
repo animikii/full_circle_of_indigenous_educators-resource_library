@@ -13,6 +13,7 @@
       Notifications
     },
     created() {
+      store.actions.initialize();
       store.actions.initializeResources(resourcesRoute);
     }
   });
@@ -36,6 +37,7 @@
     --color-text: rgb(91, 61, 61);
 
     --transition-time: 300ms;
+    --header-size: 1.4em;
 
     font-family: Lato, sans-serif;
     color: var(--color-text);

@@ -200,14 +200,18 @@ const actions = {
   },
   initializeFilters() {
     const hash = "CATEGORY_FILTERS";
-    cacheLoadPromise(hash, () => 
+    return cacheLoadPromise(hash, () => 
       CategoriesApi.getIndex()
     ).then(
       types => state.categoryTypes = types 
     );
   },
   initializeFilter(categoryType) {
-    CategoriesApi.get(categoryType).then(categories =>
+    const hash = `CATEGORY_${categoryType}`;
+    return cacheLoadPromise(
+      hash,
+      () => CategoriesApi.get(categoryType)
+    ).then(categories =>
       state.categories[categoryType] = categories
     );
   },

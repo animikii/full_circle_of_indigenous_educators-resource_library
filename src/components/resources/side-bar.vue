@@ -4,12 +4,28 @@
   import store from '../../store';
 
   export default createComponent({
+    data() {
+      return {
+        categoryToggles: {},
+      };
+    },
     methods: {
-      loadCategory(category) {
-        store.actions.initializeFilter(category);
+      clickCategory(type) {
+        if(!this.categoryToggles[type]) {
+          store.actions.initializeFilter(type)
+            .then(() =>
+              this.categoryToggles[type] = !this.categoryToggles[type]
+            );
+        } else {
+          this.categoryToggles[type] = !this.categoryToggles[type];
+        }
+      },
+      clickFilter(category) {
+        this.categoryToggles[category] = !this.categoryToggles[category];
       },
       selectCategory(categoryType, category) {
         store.actions.setFilter(categoryType, category.Name);
+        this.categoryToggles[category.Name] = true;
       },
       removeFilter(filter) {
         store.actions.removeFilter(filter); 
@@ -73,16 +89,19 @@
     <div v-for="filter in filters">
       <div v-if="subCategories(filter.value, filter.type).length">
         <hr/>
-        <div class="category-header">
+        <div class="category-header" v-on:click="clickFilter(filter.value)">
           <span>
             {{ filter.value }}
           </span>
-          <span>
+          <span v-if="categoryToggles[filter.value]">
+            -
+          </span>
+          <span v-if="!categoryToggles[filter.value]">
             +
           </span>
         </div>
        
-        <ul class="category">
+        <ul v-if="categoryToggles[filter.value]" class="category">
           <li v-for="category in subCategories(filter.value, filter.type)" v-on:click="selectCategory(filter.type, category)">
             {{ category.Name }}
 
@@ -97,16 +116,19 @@
  
     <div v-for="categoryType in categoryTypes">
       <hr/>
-      <div class="category-header" v-on:click="loadCategory(categoryType)">
+      <div class="category-header" v-on:click="clickCategory(categoryType)">
         <span>
           {{ categoryType }} 
         </span>
-        <span>
+        <span v-if="categoryToggles[categoryType]">
+          -
+        </span>
+        <span v-if="!categoryToggles[categoryType]">
           +
         </span>
       </div>
       
-      <ul class="category">
+      <ul v-if="categoryToggles[categoryType]" class="category">
         <li v-for="category in topLevelCategories(categoryType)" v-on:click="selectCategory(categoryType, category)">
           {{ category.Name }}
 

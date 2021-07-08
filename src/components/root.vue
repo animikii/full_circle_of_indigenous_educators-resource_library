@@ -13,7 +13,6 @@
       Notifications
     },
     created() {
-      store.actions.initialize();
       store.actions.initializeResources(resourcesRoute);
     }
   });

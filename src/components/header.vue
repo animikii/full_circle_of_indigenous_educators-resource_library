@@ -2,13 +2,11 @@
   import { createComponent } from './';
 
   export default createComponent({
-    computed: {
-    }
   });
 </script>
 <template>
   <h1 class="resource-header">Resource Library</h1>
-  <router-link v-if='$route.name != "resources"' :to="{ name: 'resources', query: { search: searchQuery, token: currentToken }}" class='link-home'>
+  <router-link v-if='$route.name != "resources"' :to="{ name: 'resources', query: queryParams}" class='link-home'>
     <h1 class="resource-header">Back</h1>
   </router-link>
 

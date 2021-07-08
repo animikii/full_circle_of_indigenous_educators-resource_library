@@ -15,24 +15,57 @@ const ERRORS = {
   LIST_RECORDS_ITERATOR_NOT_AVAILABLE: 'LIST_RECORDS_ITERATOR_NOT_AVAILABLE'
 };
 
-const throttledFetch = _.throttle((url, resolve, reject) => {
-    return fetch(url)
-      .then(response => {
-        if(200 <= response.status && response.status <= 299) {
-          response.json().then(data => resolve(data));
-        } else {
-          response.json().then(data => reject(data.error));
-        }
-      });
-  },
-  1000
-);
+const THROTTLE_TIME = 1000;
+let throttleUntil = Date.now();
+let throttleQueue = [];
 
-const call = (url) => {
-  return new Promise((resolve, reject) => {
-    throttledFetch(url, resolve, reject);
-  });
+function checkThrottleQueue() {
+  
+  let delay = throttleUntil - Date.now();
+
+  if(delay > 0) {
+    setTimeout(checkThrottleQueue, delay);
+  } else if(throttleQueue.length) {
+    var next = throttleQueue[throttleQueue.length - 1];
+    throttleQueue.pop();
+
+    if(!next.serializer || !next.serializer.isExpired()) {
+      next.fetch();
+      throttleUntil = Date.now() + THROTTLE_TIME;
+    }
+  }
+  
 }
+
+const throttledFetch = (url, serializer) => {
+  
+  const createDelayedFetch = (resolve, reject) => {
+    fetch(url)
+        .then(response => {
+          checkThrottleQueue();
+          return response;
+        })
+        .then(response => {
+          console.log(response);
+          if(200 <= response.status && response.status <= 299) {
+            console.log('fish')
+            return response.json().then(resolve);;
+          } else {
+            console.log('elephant');
+            return response.json().then(reject);
+          }
+        });
+  };
+
+  return new Promise((resolve, reject) => {
+    throttleQueue.push({
+      fetch: () => createDelayedFetch(resolve, reject),
+      serializer
+    });
+    checkThrottleQueue();
+  });
+  
+};
 
 function mapRecord(record) {
   return { 
@@ -50,17 +83,16 @@ function mapRecords(data) {
 }
 
 function get(resource) {
-  return call(`${BASE_URL}/${resource}?api_key=${API_KEY}`)
+  return throttledFetch(`${BASE_URL}/${resource}?api_key=${API_KEY}`)
     .then(mapRecord);
 }
 
-function getAll(resource, { pageToken = '', sort = '', fields='', pageSize = PAGE_SIZE } = {} ) {
-  return call(`${BASE_URL}/${encodeURIComponent(resource)}?api_key=${API_KEY}${sort}&pageSize=${pageSize}&offset=${pageToken}${fields}`)
+function getAll(resource, { pageToken = '', sort = '', fields='', pageSize = PAGE_SIZE, serializer } = {} ) {
+  return throttledFetch(`${BASE_URL}/${encodeURIComponent(resource)}?api_key=${API_KEY}${sort}&pageSize=${pageSize}&offset=${pageToken}${fields}`, serializer)
     .then(mapRecords);
 }
 
-function search(resource, fieldQueries, { sort = '', pageSize = PAGE_SIZE } = {}) {
-  console.log(fieldQueries);
+function search(resource, fieldQueries, { sort = '', pageSize = PAGE_SIZE, serializer } = {}) {
 
   const createFieldFormula = fieldQuery => {
     const fieldSearch = fieldQuery.query.map(query => {
@@ -93,8 +125,25 @@ function search(resource, fieldQueries, { sort = '', pageSize = PAGE_SIZE } = {}
     sort
   ].join('&');
 
-  return call(`${BASE_URL}/${resource}?${queryParams}`)
+  return throttledFetch(`${BASE_URL}/${resource}?${queryParams}`, serializer)
     .then(mapRecords);
 }
 
-export default { get, getAll, search, SORT }
+function createCallSerializer() {
+  let currentCallId = 0;
+  
+
+  const newCall = () => {
+    let id = ++currentCallId;
+    
+    return {
+      isExpired: () => {
+        return id != currentCallId;
+      }
+    }
+  };
+
+  return { newCall };      
+}
+
+export default { get, getAll, search, SORT, createCallSerializer }

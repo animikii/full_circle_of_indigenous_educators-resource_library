@@ -1,20 +1,31 @@
 <script>
   import _ from 'lodash';
+
   import { createComponent } from '../';
+  import LoadingSpinner from '../loading-spinner';
+
   import store from '../../store';
 
   export default createComponent({
     data() {
       return {
         categoryToggles: {},
+        categoryLoading: {},
+        loading: false,
+        initialized: false,
       };
     },
     methods: {
       clickCategory(type) {
         if(!this.categoryToggles[type]) {
+          this.categoryLoading[type] = true;
           store.actions.initializeFilter(type)
             .then(() =>
               this.categoryToggles[type] = !this.categoryToggles[type]
+            ).then(() => 
+              this.categoryLoading[type] = false
+            ).then(() => 
+              this.initialized = true
             );
         } else {
           this.categoryToggles[type] = !this.categoryToggles[type];
@@ -24,11 +35,21 @@
         this.categoryToggles[category] = !this.categoryToggles[category];
       },
       selectCategory(categoryType, category) {
+        this.currentToken = '';
         store.actions.setFilter(categoryType, category.Name);
         this.categoryToggles[category.Name] = true;
+        this.$router.replace({
+          name: 'resources',
+          query: this.queryParams 
+        });
       },
       removeFilter(filter) {
         store.actions.removeFilter(filter); 
+        this.$router.replace({
+          name: 'resources',
+          query: this.queryParams 
+        });
+
       },
       topLevelCategories(categoryType) {
         if(this.categories[categoryType]) {
@@ -61,7 +82,12 @@
 
     },
     created() {
-      store.actions.initializeFilters(); 
+      this.loading = true;
+      store.actions.initializeFilters()
+        .then(() => this.loading = false); 
+    },
+    components: {
+      LoadingSpinner,
     }
   });
 </script>
@@ -86,7 +112,9 @@
       </ul> 
     </div>
 
-    <div v-for="filter in filters">
+    <LoadingSpinner v-bind:enabled='loading'></LoadingSpinner>
+
+    <div v-if="initialized" v-for="filter in filters">
       <div v-if="subCategories(filter.value, filter.type).length">
         <hr/>
         <div class="category-header" v-on:click="clickFilter(filter.value)">
@@ -127,6 +155,9 @@
           +
         </span>
       </div>
+
+      <LoadingSpinner v-bind:enabled="categoryLoading[categoryType]">
+      </LoadingSpinner>
       
       <ul v-if="categoryToggles[categoryType]" class="category">
         <li v-for="category in topLevelCategories(categoryType)" v-on:click="selectCategory(categoryType, category)">

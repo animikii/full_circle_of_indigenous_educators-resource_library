@@ -59,8 +59,9 @@
         </span>
       </div>
     </div>
+
     <div class="details">
-      <router-link v-if='$route.name == "resources"' :to="{ name: 'resource', params: { id: resource._id }, query: { search: searchQuery, token: currentToken} }" class="title">
+      <router-link v-if='$route.name == "resources"' :to="{ name: 'resource', params: { id: resource._id }, query: queryParams }" class="title">
         {{ resource.Title }}
       </router-link>
       <span v-if='$route.name != "resources"' :to="{ name: 'resource', params: { id: resource._id }}" class="title inactive">

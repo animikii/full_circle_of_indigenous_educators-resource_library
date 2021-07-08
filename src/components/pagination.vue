@@ -10,12 +10,12 @@
 <template>
   <div class='pagination'>
     <span>
-      <router-link v-if='prevToken' :to="{ name: $route.name, query: { token: prevToken, search: searchQuery }}">
+      <router-link v-if='prevToken' :to="{ name: $route.name, query: { ...queryParams, token: prevToken }}">
         Previous
       </router-link>
     </span>
     <span>
-      <router-link v-if='nextToken' :to="{ name: $route.name, query: { token: nextToken, search: searchQuery }}">
+      <router-link v-if='nextToken' :to="{ name: $route.name, query: { ...queryParams, token: nextToken }}">
         Next
       </router-link>
     </span>

@@ -20,7 +20,7 @@
 
         this.$router.replace({
           name: 'resources',
-          query: { search: this.searchQuery, token: this.currentToken }
+          query: this.queryParams 
         });
       }
     },

@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { reactive } from 'vue';
 import {unref} from 'vue';
 
+import Api from '../api';
 import ResourceApi from '../api/resources';
 import ReviewsApi from '../api/reviews';
 import CategoriesApi from '../api/categories';
@@ -25,23 +26,27 @@ const DEFAULT_FIELDS = [
 
 let router;
 
-const state = reactive({
-  currentResource: null,
-  reviews: {},
-  resources: [],
-  currentToken: createStartToken(),
-  searchQuery: '',
-  searchFields: [...DEFAULT_FIELDS],
-  filters: [],
-  categoryTypes: [],
-  categories: {},
-  nextToken: '',
-  prevToken: '',
-  nextTokens: {},
-  prevTokens: {},
-  defaultRoute: {},
-  notifications: [],
-});
+function createInitialState() {
+  return {
+    currentResource: null,
+    reviews: {},
+    resources: [],
+    currentToken: createStartToken(),
+    searchQuery: '',
+    searchFields: [...DEFAULT_FIELDS],
+    filters: [],
+    categoryTypes: [],
+    categories: {},
+    nextToken: '',
+    prevToken: '',
+    nextTokens: {},
+    prevTokens: {},
+    defaultRoute: {},
+    notifications: [],
+  };
+}
+
+const state = reactive(createInitialState());
 
 function setRouter(r) {
   router = r;
@@ -183,12 +188,14 @@ function handleResourcesError(error) {
   } 
 }
 
+const resourcesSerializer = Api.createCallSerializer();
+
 const actions = {
   initialize() {
     evictStaleCacheItems();
-  },
-  initializeResources() {
 
+    // Load query params
+    
     const params = new URLSearchParams(window.location.href.split("?")[1]);
 
     if(params.get('token')) {
@@ -196,6 +203,18 @@ const actions = {
     }
     state.searchQuery = params.get('search'); 
 
+    if(params.get('filters')) {
+      state.filters = decodeURIComponent(params.get('filters'))
+        .split(',')
+        .map(param => {
+          const type = param.split('|')[0];
+          const value = param.split('|')[1];
+
+          return { type, value };
+        });
+    }
+  },
+  initializeResources() {
     loadTokens();
   },
   initializeFilters() {
@@ -223,8 +242,8 @@ const actions = {
         type: field,
         value
       });
+      this.getResourcePage();
     }
-    this.getResourcePage();
   },
   removeFilter(filter) {
     state.filters = state.filters.filter(f => f != filter);
@@ -265,6 +284,7 @@ const actions = {
   },
 
   getResourcePage() {
+
     const isSearch = state.searchQuery || state.filters.length;
     let apiCall;
 
@@ -287,8 +307,10 @@ const actions = {
 
     const hash = `GET_RESOURCE_PAGE=${apiToken}`; 
 
-    return cacheLoadPromise(hash, () => ResourceApi.get({ pageToken: apiToken }))
-      .then(page => setResourcePage(pageToken, page));
+    return cacheLoadPromise(
+        hash,
+        () => ResourceApi.get({ pageToken: apiToken }, resourcesSerializer.newCall())
+      ).then(page => setResourcePage(pageToken, page));
   },
 
   searchResources() {
@@ -324,7 +346,7 @@ const actions = {
     const queries = [ ...searchQueries, ...filterQueries ];
     const hash = `SEARCH_RESOURCES=${JSON.stringify(queries)}`;
 
-    return cacheLoadPromise(hash, () => ResourceApi.search(queries))
+    return cacheLoadPromise(hash, () => ResourceApi.search(queries, resourcesSerializer.newCall()))
       .then(page => { setResourcePage(createStartToken(), page); })
   },
   resetSession() {
@@ -335,8 +357,16 @@ const actions = {
     state.nextTokens = {};
     state.prevTokens = {};
     state.currentToken = createStartToken();
+    state.nextToken = '';
+    state.prevToken = '';
+    state.resources = [];
+    state.filters = [];
+    state.searchQuery = '';
+    state.searchFields = [...DEFAULT_FIELDS];
   },
 };
+
+actions.initialize();
 
 export default { state, actions, isStartToken, createStartToken, setRouter };
 

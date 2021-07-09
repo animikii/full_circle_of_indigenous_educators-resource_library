@@ -10,7 +10,6 @@
   export default createComponent({
     data() {
       return {
-        searching: false
       }
     },
     methods: {
@@ -40,7 +39,7 @@
       v-on:input='search'
       v-on:keyup.enter='search'
       v-bind:value="searchQuery" >
-    <LoadingSpinner v-bind:enabled='searching' ></LoadingSpinner>
+      <LoadingSpinner v-bind:class="{ spinner: searching }" v-bind:enabled='searching' ></LoadingSpinner>
     <slot></slot>
   </div>
 </template>
@@ -56,6 +55,21 @@
     font-size: 1.5em;
     width: 50%;
     padding: 8px;
+    box-sizing: border-box;
+  }
+
+  @media(max-width: 1024px) {
+    .resource-search-bar {
+      flex-direction: column;
+      justify-content: center;
+    }
+    .resource-search-bar input {
+      width: 100%;
+    }
+
+    .spinner {
+      margin-bottom: -32px;
+    }
   }
 
 </style>

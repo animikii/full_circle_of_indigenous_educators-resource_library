@@ -66,8 +66,10 @@
       <div v-for='review in resourceReviews' class='reviews'>
         <Review v-bind:review='review'></Review>
       </div>
-      <ReviewSubmission class="review-submission"></ReviewSubmission>
+
+      <ReviewSubmission style='margin-top: -8px; margin-bottom: 8px;' class="review-submission"></ReviewSubmission>
     </ResourceItem>
+
   </div>
 </template>
 

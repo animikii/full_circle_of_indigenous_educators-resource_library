@@ -13,9 +13,16 @@
         categoryLoading: {},
         loading: false,
         initialized: false,
+        showFilters: false,
       };
     },
     methods: {
+      resetSession() {
+        store.actions.resetSession();
+      },
+      toggleFilters() {
+        this.showFilters = !this.showFilters;
+      },
       clickCategory(type) {
         if(!this.categoryToggles[type]) {
           this.categoryLoading[type] = true;
@@ -64,7 +71,7 @@
 
 
         if(!this.categories[categoryType]) {
-          return;
+          return [];
         }
 
         const categoryValue = this.categories[categoryType].find(c =>
@@ -72,7 +79,7 @@
         ); 
 
         if(!categoryValue) {
-          return;
+          return [];
         }
 
         return this.categories[categoryType].filter(c => {
@@ -96,7 +103,7 @@
   <div id="side-bar">
     <div class="side-bar-filters">
       <div class="filter-header">
-        Filters:
+        Filtered By:
       </div>
       <ul>
         <li v-for="filter in filters">
@@ -112,8 +119,20 @@
       </ul> 
     </div>
 
+    <button class='toggle-filters' v-on:click='toggleFilters'>
+      <span v-if='!showFilters'>
+        Show
+      </span>
+      <span v-if='showFilters'>
+        Hide
+      </span>
+        Menu 
+
+    </button>
+
     <LoadingSpinner v-bind:enabled='loading'></LoadingSpinner>
 
+  <div v-bind:class='{ hideFilters: !showFilters }'>
     <div v-if="initialized" v-for="filter in filters">
       <div v-if="subCategories(filter.value, filter.type).length">
         <hr/>
@@ -170,7 +189,15 @@
         </li>
       </ul>
     </div>
-        
+    <button class='btn' v-on:click='resetSession'>Reset Session</button>        
+    <a target="_blank" href="https://airtable.com/shrN7dbggyC43DhUu">
+      <button class='btn'>
+        Submit Resource
+      </button>
+    </a>        
+  </div>
+
+
   </div>
 </template>
 
@@ -178,6 +205,10 @@
   #side-bar {
     width: 200px;
     margin-top: 2em;
+  }
+
+  @media(max-width: 1024px) {
+    margin-top: 1em;
   }
 
   .side-bar-filters ul {
@@ -235,5 +266,99 @@
   .remove-filter:hover {
     font-weight: bold;
     cursor: pointer;
+  }
+  
+  .toggle-filters {
+    display: none;
+  }
+
+  #side-bar a {
+    text-decoration: none;  
+  }
+    
+  .btn {
+    margin: 0;
+    margin-top: 16px;
+    display: block;
+    color: var(--color-primary);
+    background: white;
+    border: 1px solid var(--color-primary);
+    padding: 8px 16px;
+    border-radius: 5px;      
+    transition: background 300ms, color 300ms;
+    font-size: 1em;
+    text-decoration: none;
+  }
+
+  .btn:hover, .btn:focus, .btn:active  {
+    color: white;
+    background: var(--color-primary);
+    cursor: pointer;
+  }
+
+
+  @media(max-width: 1024px) {
+    #side-bar {
+      width: 100%;
+    }
+
+    .side-bar-filters ul {
+      display: flex;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+
+    .side-bar-filters li {
+      margin: 0 5px;
+    }
+
+    .remove-filter {
+      margin-left: 8px;
+      display: inline-block;
+    }
+
+    .hideFilters {
+      display: none;
+    }
+ 
+    .toggle-filters {
+      display: block;
+      border: none;
+      color: var(--color-primary);
+      margin: 0;
+      padding: 0;
+      font-size: 1em;
+      background: none;
+    }   
+  
+    .toggle-filters:hover,
+    .toggle-filters:focus,
+    .toggle-filters:active {
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+
+/*
+    .toggle-filters {
+      display: block;
+      margin-top: -8px;
+      color: var(--color-primary);
+      background: white;
+      border: 1px solid var(--color-primary);
+      padding: 8px 16px;
+      border-radius: 5px;      
+      transition: background 300ms, color 300ms;
+      font-size: 1em;
+    }
+
+    .toggle-filters:hover, .toggle-filters:focus, .toggle-filters:active  {
+      color: white;
+      background: var(--color-primary);
+      cursor: pointer;
+    }
+
+*/
+
   }
 </style>

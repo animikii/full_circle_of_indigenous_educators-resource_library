@@ -11,10 +11,6 @@ const SORT = {
   REVIEWS_ASC: '&sort%5B0%5D%5Bfield%5D=createdTime&sort%5B0%5D%5Bdirection%5D=desc'
 }
 
-const ERRORS = {
-  LIST_RECORDS_ITERATOR_NOT_AVAILABLE: 'LIST_RECORDS_ITERATOR_NOT_AVAILABLE'
-};
-
 const THROTTLE_TIME = 1000;
 let throttleUntil = Date.now();
 let throttleQueue = [];
@@ -46,13 +42,16 @@ const throttledFetch = (url, serializer) => {
           return response;
         })
         .then(response => {
-          console.log(response);
+          if(serializer && serializer.isExpired()) {
+            reject('call expired');
+          }
+          return response;
+        })
+        .then(response => {
           if(200 <= response.status && response.status <= 299) {
-            console.log('fish')
             return response.json().then(resolve);;
           } else {
-            console.log('elephant');
-            return response.json().then(reject);
+            return response.json().then(data => reject(data.error));
           }
         });
   };

@@ -34,6 +34,12 @@
     max-width: 100%;
   }
 
+  @media(max-width: 576px) {
+    .resource-list-container {
+      padding: 0;
+    }  
+  }
+
   .resource-list {
     display: grid;
     grid-template-columns: 1fr 1fr; 
@@ -52,5 +58,11 @@
   .resource-list-container .not-found {
     font-size: 1.5em;
     font-weight: bold; 
+  }
+
+  @media(max-width: 1024px) {
+    .resource-list {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

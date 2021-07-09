@@ -6,6 +6,7 @@ const SORT_CATEGORIES = '&sort%5B0%5D%5Bfield%5D=Category%20Name&sort%5B0%5D%5Bd
 const SORT_SUBCATEGORIES = '&sort%5B0%5D%5Bfield%5D=Name&sort%5B0%5D%5Bdirection%5D=asc'
 const FIELDS = '&fields%5B%5D=Name\&fields%5B%5D=Related';
 
+const serializer = Api.createCallSerializer();
 
 const CategoriesApi = { 
   getIndex() {
@@ -14,7 +15,7 @@ const CategoriesApi = {
     );
   },
   get(category) {
-    return Api.getAll(category, { pageSize: 100, fields: FIELDS, sort: SORT_SUBCATEGORIES }).then(page => page.records);
+    return Api.getAll(category, { pageSize: 100, fields: FIELDS, sort: SORT_SUBCATEGORIES, serializer: serializer.newCall() }).then(page => page.records);
   }
 };
 

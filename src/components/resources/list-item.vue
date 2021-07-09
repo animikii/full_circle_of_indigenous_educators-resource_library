@@ -147,6 +147,12 @@
     padding-top: 0;
   }
 
+  @media(max-width: 576px) {
+    .resource-tile .details {
+      padding: 0em;
+    }
+  }
+
 
   .resource-tile .title {
     font-weight: bold;
@@ -216,5 +222,13 @@
     text-decoration: underline;
   }
 
+  @media(max-width: 576px) {
+    .resource-tile {
+      flex-direction: column;
+    }    
 
+    .resource-tile .details {
+      margin-top: 1em;
+    }
+  }
 </style>

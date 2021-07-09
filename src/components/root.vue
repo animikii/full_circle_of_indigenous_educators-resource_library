@@ -42,4 +42,9 @@
     color: var(--color-text);
   }
 
+  @media(max-width: 1220px) {
+    #root {
+      padding: 0 1em;
+    }
+  }
 </style>

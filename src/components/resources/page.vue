@@ -66,22 +66,37 @@
 <template>
   <SearchBar>
     <LoadingSpinner v-bind:enabled='loading' fill='black'> </LoadingSpinner>
-    <Pagination v-bind:defaultRoute="route" class='resources-pagination'></Pagination>
+    <Pagination v-if='nextToken || prevToken' v-bind:defaultRoute="route" class='resources-pagination'></Pagination>
   </SearchBar>
 
   <div class='resources-page-content'>
     <SideBar></SideBar>
-    <ResourceList v-bind:loading="loading"></ResourceList>
+    <div style='flex: 1'>
+      <ResourceList v-bind:loading="loading"></ResourceList>
+      <Pagination style='margin-bottom: 32px; justify-content: center;' v-bind:defaultRoute="route" class='resources-pagination bottom'></Pagination>
+    </div>
   </div>
 </template>
 
 <style>
-  .resources-pagination {
-    float: right;
-  }
 
   .resources-page-content {
     display: flex;
+  }
+
+  .resources-pagination.bottom {
+    display: none;
+  }
+
+
+  @media(max-width: 1024px) {
+    .resources-page-content {
+      flex-direction: column;
+    }
+
+    .resources-pagination.bottom {
+      display: flex; 
+    }
   }
 </style>
 

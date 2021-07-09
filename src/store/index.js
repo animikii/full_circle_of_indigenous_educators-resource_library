@@ -180,7 +180,6 @@ function handleResourcesError(error) {
 
     notification.action = () => {
       actions.resetSession();    
-      getRouter().replace(state.defaultRoute); 
       clearNotification(notification);
     };
 
@@ -307,15 +306,15 @@ const actions = {
 
     const hash = `GET_RESOURCE_PAGE=${apiToken}`; 
 
+    let serializer = resourcesSerializer.newCall()
     return cacheLoadPromise(
         hash,
-        () => ResourceApi.get({ pageToken: apiToken }, resourcesSerializer.newCall())
+        () => ResourceApi.get({ pageToken: apiToken }, serializer)
       ).then(page => setResourcePage(pageToken, page));
   },
 
   searchResources() {
     const query = state.searchQuery || '';
-    console.log(query);
 
     const filterQueries = state.searchFields.map(field => {
       const matchingFilters = state.filters.filter(
@@ -346,7 +345,8 @@ const actions = {
     const queries = [ ...searchQueries, ...filterQueries ];
     const hash = `SEARCH_RESOURCES=${JSON.stringify(queries)}`;
 
-    return cacheLoadPromise(hash, () => ResourceApi.search(queries, resourcesSerializer.newCall()))
+    let serializer = resourcesSerializer.newCall();
+    return cacheLoadPromise(hash, () => ResourceApi.search(queries, serializer))
       .then(page => { setResourcePage(createStartToken(), page); })
   },
   resetSession() {
@@ -363,6 +363,9 @@ const actions = {
     state.filters = [];
     state.searchQuery = '';
     state.searchFields = [...DEFAULT_FIELDS];
+    state.notifications = [];
+
+    getRouter().replace(state.defaultRoute); 
   },
 };
 

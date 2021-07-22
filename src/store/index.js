@@ -366,6 +366,7 @@ const actions = {
     state.notifications = [];
 
     getRouter().replace(state.defaultRoute); 
+    this.getResourcePage();
   },
 };
 

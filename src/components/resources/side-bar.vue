@@ -190,7 +190,7 @@
       </ul>
     </div>
     <button class='btn' v-on:click='resetSession'>Reset Session</button>        
-    <a target="_blank" href="https://airtable.com/shrN7dbggyC43DhUu">
+    <a target="_blank" href="https://airtable.com/shrQB98I67NQi1IZd">
       <button class='btn'>
         Submit Resource
       </button>

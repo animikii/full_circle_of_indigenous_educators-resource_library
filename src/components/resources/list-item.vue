@@ -53,7 +53,7 @@
     <div class="image">
       <img v-if="resource.Image && resource.Image" aria-hidden=true v-bind:src="resource.Image[0].url"/>
       <div v-if="!resource.Image" style="padding: 1em; padding-top: 0; text-align: center;  display: flex; flex-direction: column; justify-content: center; align-items: center;">
-        <img src="logo.png" style="object-position: top"/>
+        <img src="/images/logo.png" style="object-position: top"/>
         <span style="margin-top: -24px;">
           No Image Submitted
         </span>

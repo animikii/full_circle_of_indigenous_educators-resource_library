@@ -32,7 +32,6 @@
   .resource-category {
     font-weight: bold;
     display: inline-block;
-    height: 100%;
   }
 
 </style>

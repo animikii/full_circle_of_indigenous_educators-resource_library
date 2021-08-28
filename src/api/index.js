@@ -119,7 +119,7 @@ function search(resource, fieldQueries, { sort = '', pageSize = PAGE_SIZE, seria
 
   const queryParams = [
     `api_key=${API_KEY}`,
-    `filterByFormula=${encodeURI(filterFormula)}`,
+    `filterByFormula=${encodeURIComponent(filterFormula)}`,
     `&pageSize=${pageSize}`,
     sort
   ].join('&');

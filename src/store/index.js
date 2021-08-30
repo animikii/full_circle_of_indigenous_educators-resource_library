@@ -14,15 +14,21 @@ const ERROR_LIST_RECORDS_ITERATOR_NOT_AVAILABLE = 'LIST_RECORDS_ITERATOR_NOT_AVA
 
 const SEARCH_PREFIX = 'Search ';
 
-const DEFAULT_FIELDS = [
+const DEFAULT_FIELDS_CONTENT = [
  'Title',
  'Description',
+];
+
+const DEFAULT_FIELDS_CATEGORIES = [
  SEARCH_PREFIX + 'Creators',
  SEARCH_PREFIX + 'Nation',
  SEARCH_PREFIX + 'Subject',
  SEARCH_PREFIX + 'Theme',
  SEARCH_PREFIX + 'Type'
 ];
+
+
+const DEFAULT_FIELDS = [ ...DEFAULT_FIELDS_CONTENT, ...DEFAULT_FIELDS_CATEGORIES ];
 
 let router;
 
@@ -221,7 +227,14 @@ const actions = {
     return cacheLoadPromise(hash, () => 
       CategoriesApi.getIndex()
     ).then(
-      types => state.categoryTypes = types 
+      types => {
+        state.categoryTypes = types;
+        state.searchFields = [
+          ...DEFAULT_FIELDS_CONTENT,
+          ...types.map(category => SEARCH_PREFIX + category)
+        ];
+        return state.categoryTypes;
+      } 
     );
   },
   initializeFilter(categoryType) {
@@ -318,7 +331,9 @@ const actions = {
 
     const filterQueries = state.searchFields.map(field => {
       const matchingFilters = state.filters.filter(
-        filter => SEARCH_PREFIX + filter.type === field
+        filter => {
+            return SEARCH_PREFIX + filter.type === field;
+          }
       );
 
       if(matchingFilters.length) {
@@ -341,6 +356,7 @@ const actions = {
         }
       });
     }
+
 
     const queries = [ ...searchQueries, ...filterQueries ];
     const hash = `SEARCH_RESOURCES=${JSON.stringify(queries)}`;
@@ -367,6 +383,7 @@ const actions = {
 
     getRouter().replace(state.defaultRoute); 
     this.getResourcePage();
+    this.initializeFilters();
   },
 };
 

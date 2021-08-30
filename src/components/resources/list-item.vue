@@ -75,25 +75,15 @@
       </div>
 
       <div class="details-grid">
-        <ResourceTags
-          category="Type"
-          v-bind:tags="resource['Type Lookup']"></ResourceTags>
+          <ResourceTags v-for="category in categoryTypes"
+            v-bind:category="category" 
+            v-bind:tags="formatTags(resource[ category + ' Lookup'])">
+          </ResourceTags>
 
-        <ResourceTags
-          category="Subject"
-          v-bind:tags="resource['Subject Lookup']"></ResourceTags>
-
-        <ResourceTags
-          category="Theme"
-          v-bind:tags="formatTags(resource['Theme Lookup'])"></ResourceTags>
-
-        <ResourceTags
-          category="Nation"
-          v-bind:tags="resource['Nation Lookup']"></ResourceTags>
-
-        <ResourceTags
-          category="Age"
-          v-bind:tags="resource['Age Range']"></ResourceTags>
+          <ResourceTags
+            category="Age"
+            v-bind:tags="resource['Age Range']">
+          </ResourceTags>
 
         <div style="font-weight: bold">Rating</div>
         <Star v-if='resource.Rating' v-bind:rating='resource.Rating'></Star>

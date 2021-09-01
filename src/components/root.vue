@@ -31,6 +31,11 @@
 </template>
 
 <style>
+  #app {
+    display: flex;
+    flex-direction: column;
+  }
+
   #root {
     --color-primary: #1a67b5;
     --color-text: rgb(91, 61, 61);
@@ -40,6 +45,8 @@
 
     font-family: Lato, sans-serif;
     color: var(--color-text);
+
+    height: auto;
   }
 
   @media(max-width: 1220px) {

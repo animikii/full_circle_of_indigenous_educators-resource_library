@@ -54,7 +54,7 @@
       <img v-if="resource.Image && resource.Image" aria-hidden=true v-bind:src="resource.Image[0].url"/>
       <div v-if="!resource.Image" style="padding: 1em; padding-top: 0; text-align: center;  display: flex; flex-direction: column; justify-content: center; align-items: center;">
         <img src="https://cdn.jsdelivr.net/gh/JonCSGuy/Full-Circle-of-Indigenous-Educators-Resource-Library/cdn/logo.png" style="object-position: top"/>
-        <span style="margin-top: -24px;">
+        <span class='no-image-caption' style="margin-top: -24px;">
           No Image Submitted
         </span>
       </div>
@@ -198,6 +198,11 @@
   .resource-tile.expanded .image {
     margin: 0;
   }
+
+  .resource-tile.expanded .image .no-image-caption {
+    margin-top: 8px!important;
+  }
+
 
   .resource-tile .resource-link {
     font-size: 1.15em;

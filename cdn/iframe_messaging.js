@@ -2,7 +2,7 @@
 
 function updateParent() {
   
-  var data = { height: document.querySelector('.content').clientHeight };
+  var data = { height: document.querySelector('#app').clientHeight };
   
   var event = new CustomEvent('resourceLibraryIframeEvent', { detail: data })
 

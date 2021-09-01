@@ -52,6 +52,34 @@ function createInitialState() {
   };
 }
 
+class LocalStorage {
+  static _ROOT_KEY = 'fice-resource-library';
+
+  getItem(key) {
+   return window.localStorage.getItem(LocalStorage._ROOT_KEY + '-' + key); 
+  }
+
+  setItem(key, value) {
+   return window.localStorage.setItem(LocalStorage._ROOT_KEY + '-' + key, value);
+  };
+
+  removeItem(key) {
+    window.localStorage.removeItem(LocalStorage._ROOT_KEY + '-' + key);
+  }
+
+  getKeys() {
+    const keyPattern = new RegExp('^' + LocalStorage._ROOT_KEY);
+
+    return Object.keys(window.localStorage).filter(key => key.match(keyPattern));
+  }
+
+  clear() {
+    this.getKeys().forEach(key => window.localStorage.removeItem(key));
+  }
+}
+
+const libraryStorage = new LocalStorage();
+
 const state = reactive(createInitialState());
 
 function setRouter(r) {
@@ -75,13 +103,13 @@ function isStartToken(token) {
 }
 
 function loadTokens() {
-    if(localStorage['nextTokens']) {
-      state.nextTokens = JSON.parse(localStorage['nextTokens']);
+    if(libraryStorage.getItem('nextTokens')) {
+      state.nextTokens = JSON.parse(libraryStorage.getItem('nextTokens'));
     } else {
       state.nextTokens = {};
     }
-    if(localStorage['prevTokens']) {
-      state.prevTokens = JSON.parse(localStorage['prevTokens']);
+    if(libraryStorage.getItem('prevTokens')) {
+      state.prevTokens = JSON.parse(libraryStorage.getItem('prevTokens'));
     } else {
       state.prevTokens = {};
     }
@@ -101,8 +129,8 @@ function setPagingTokens(token, page) {
     state.prevTokens[page.offset] = token;
     state.currentToken = token;
 
-    localStorage['nextTokens'] = JSON.stringify(state.nextTokens);
-    localStorage['prevTokens'] = JSON.stringify(state.prevTokens);
+    libraryStorage.setItem('nextTokens', JSON.stringify(state.nextTokens));
+    libraryStorage.setItem('prevTokens', JSON.stringify(state.prevTokens));
 
     state.nextToken = state.nextTokens[state.currentToken];
 
@@ -121,13 +149,13 @@ function setResourcePage(token, page) {
 };
 
 function evictStaleCacheItems() {
-  Object.keys(localStorage).forEach(key => {
+  libraryStorage.getKeys().forEach(key => {
     cacheLoad(key);
   });
 }
 
 function cacheLoad(hashKey) {
-  const cachedData = localStorage.getItem(hashKey);
+  const cachedData = libraryStorage.getItem(hashKey);
 
   if(!cachedData) {
     return;
@@ -136,7 +164,7 @@ function cacheLoad(hashKey) {
   const parsedData = JSON.parse(cachedData)
 
   if(parsedData.expiresAt < Date.now()) {
-    localStorage.removeItem(hashKey);
+    libraryStorage.removeItem(hashKey);
     return;
   }
 
@@ -151,7 +179,7 @@ function cachePersist(payload, hashKey) {
     expiresAt
   });
 
-  localStorage.setItem(hashKey, cachedData);
+  libraryStorage.setItem(hashKey, cachedData);
 }
 
 function cacheLoadPromise(hash, onCacheMiss) {
@@ -366,10 +394,10 @@ const actions = {
       .then(page => { setResourcePage(createStartToken(), page); })
   },
   resetSession() {
-    localStorage.clear();
+    libraryStorage.clear();
 
-    localStorage.removeItem('nextTokens');
-    localStorage.removeItem('prevTokens');
+    libraryStorage.removeItem('nextTokens');
+    libraryStorage.removeItem('prevTokens');
     state.nextTokens = {};
     state.prevTokens = {};
     state.currentToken = createStartToken();

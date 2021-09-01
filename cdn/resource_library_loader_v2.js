@@ -20,7 +20,7 @@
   
   const doc = document.querySelector('iframe').contentWindow.document;
   doc.open();
-  doc.write('<html><body><div class="content"><div id="app"></div></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/JonCSGuy/Full-Circle-of-Indigenous-Educators-Resource-Library@master/cdn/resource_library.css"><script type="module" src="https://cdn.jsdelivr.net/gh/JonCSGuy/Full-Circle-of-Indigenous-Educators-Resource-Library@master/cdn/resource_library.js"></script><script type="module" src=""https://cdn.jsdelivr.net/gh/JonCSGuy/Full-Circle-of-Indigenous-Educators-Resource-Library@master/cdn/iframe_messaging.js></script></body></html>')
+  doc.write('<html><body><div class="content"><div id="app"></div></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/JonCSGuy/Full-Circle-of-Indigenous-Educators-Resource-Library@master/cdn/resource_library.css"><script type="module" src="https://cdn.jsdelivr.net/gh/JonCSGuy/Full-Circle-of-Indigenous-Educators-Resource-Library@master/cdn/resource_library.js"></script><script type="module" src="https://cdn.jsdelivr.net/gh/JonCSGuy/Full-Circle-of-Indigenous-Educators-Resource-Library@master/cdn/iframe_messaging.js"></script></body></html>')
   doc.close();
   
 })();

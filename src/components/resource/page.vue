@@ -14,6 +14,9 @@
         loading: false,
       }
     },
+    updated: function() {
+      window.scrollTo(0, 0);
+    },
     computed: {
       resourceId() {
         return this.$route.params.id;

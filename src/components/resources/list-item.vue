@@ -115,7 +115,6 @@
   }
 
   .resource-tile .image {
-    height: 100%;
     width: 33%;
     margin: auto;
     display: inline-block;

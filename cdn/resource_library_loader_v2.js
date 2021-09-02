@@ -20,7 +20,7 @@
   
   const doc = document.querySelector('iframe').contentWindow.document;
   doc.open();
-  doc.write('<html><body><div class="content"><div id="app"></div></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/JonCSGuy/Full-Circle-of-Indigenous-Educators-Resource-Library@c1e2c595972e621cac9c27863ced9b26afe1bf38/cdn/resource_library.css"><script type="module" src="https://cdn.jsdelivr.net/gh/JonCSGuy/Full-Circle-of-Indigenous-Educators-Resource-Library@43938c223d5272086b180878b4727af5be2fdd64/cdn/resource_library.js"></script><script type="module" src="https://cdn.jsdelivr.net/gh/JonCSGuy/Full-Circle-of-Indigenous-Educators-Resource-Library@29468beabf8bd9a162cf56e9d55e18720645a4ae/cdn/iframe_messaging.js"></script></body></html>')
+  doc.write('<html><body><div class="content"><div id="app"></div></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/animikii/full_circle_of_indigenous_educators-resource_library@ec6a57ae7187fdbda43085ef70d9597145ec6dc5/cdn/resource_library.css"><script type="module" src="https://cdn.jsdelivr.net/gh/animikii/full_circle_of_indigenous_educators-resource_library@ec6a57ae7187fdbda43085ef70d9597145ec6dc5/cdn/resource_library.js"></script><script type="module" src="https://cdn.jsdelivr.net/gh/animikii/full_circle_of_indigenous_educators-resource_library@ec6a57ae7187fdbda43085ef70d9597145ec6dc5/cdn/iframe_messaging.js"></script></body></html>')
   doc.close();
   
 })();

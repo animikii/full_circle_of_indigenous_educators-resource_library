@@ -15,7 +15,11 @@
       }
     },
     updated: function() {
-      window.scrollTo(0, 0);
+      var data = { scrollTop: true };
+      
+      var event = new CustomEvent('resourceLibraryIframeScrollEvent', { detail: data })
+
+      window.parent.document.dispatchEvent(event)
     },
     computed: {
       resourceId() {

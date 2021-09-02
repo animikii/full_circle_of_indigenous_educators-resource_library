@@ -17,6 +17,13 @@
   }
   
   window.document.addEventListener('resourceLibraryIframeEvent', handleResourceLibraryIframeEvent, false);
+
+  function handleResourceLibraryIframeScrollEvent(e) {
+    window.scrollTo(0, 0);
+  }
+
+  window.document.addEventListener('resourceLibraryIframeScrollEvent', handleResourceLibraryIframeScrollEvent, false);
+
   
   const doc = document.querySelector('iframe').contentWindow.document;
   doc.open();

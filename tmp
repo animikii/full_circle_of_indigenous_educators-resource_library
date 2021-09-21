@@ -1,0 +1,28 @@
+<?php
+add_action( 'wp_enqueue_scripts', 'enqueue_child_theme_styles', PHP_INT_MAX);
+function enqueue_child_theme_styles() {
+  wp_enqueue_style( 'parent-style', get_template_directory_uri().'/style.css' );
+}
+
+
+add_filter('woocommerce_add_to_cart_redirect', 'themeprefix_add_to_cart_redirect');
+function themeprefix_add_to_cart_redirect() {
+ global $woocommerce;
+ $checkout_url = wc_get_checkout_url();
+ return $checkout_url;
+}
+
+// Resource Library Dependencies
+
+function load_resource_page() {
+  if( is_page(8573) ) {
+	  
+    wp_enqueue_script('resource-library-script', 'https://cdn.jsdelivr.net/gh/animikii/full_circle_of_indigenous_educators-resource_library@a241eecb0dfca768599578b8d317dcb74621509e/cdn/resource_library_loader_v2.js', array(), false, true);
+  }
+}
+
+add_action('wp_enqueue_scripts', 'load_resource_page');
+
+
+?>
+

@@ -11,9 +11,14 @@
   
   var app = document.querySelector("#app");
   app.appendChild(iframe);
-  
+
   function handleResourceLibraryIframeEvent(e) {
-    iframe.style.height = `${e.detail.height + 32}px`;
+    if(e.detail.height) {
+      iframe.style.height = `${e.detail.height + 32}px`;
+    }
+    if(e.detail.link) {
+      window.location = e.detail.link;
+    }
   }
   
   window.document.addEventListener('resourceLibraryIframeEvent', handleResourceLibraryIframeEvent, false);

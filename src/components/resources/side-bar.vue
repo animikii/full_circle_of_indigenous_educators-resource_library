@@ -153,7 +153,7 @@
             {{ category.Name }}
 
             <span v-if="subCategories(category.Name, filter.type).length">
-              ({{subCategories(category.Name, filter.type).length}})
+              • 
             </span>
 
           </li>
@@ -183,7 +183,7 @@
           {{ category.Name }}
 
           <span v-if="subCategories(category.Name, categoryType).length">
-            ({{subCategories(category.Name, categoryType).length}})
+            • 
           </span>
 
         </li>

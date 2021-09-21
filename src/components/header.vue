@@ -5,7 +5,7 @@
   });
 </script>
 <template>
-  <h1 class="resource-header">Resource Library</h1>
+  <h1 class="resource-header">The Full Circle Library</h1>
   <router-link v-if='$route.name != "resources"' :to="{ name: 'resources', query: queryParams}" class='link-home'>
     <h1 class="resource-header">Back</h1>
   </router-link>

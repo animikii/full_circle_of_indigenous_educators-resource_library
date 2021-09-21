@@ -84,11 +84,6 @@
     display: flex;
   }
 
-  .resources-pagination.bottom {
-    display: none;
-  }
-
-
   @media(max-width: 1024px) {
     .resources-page-content {
       flex-direction: column;
